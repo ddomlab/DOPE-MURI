@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "n_rows": 3072,
+  "n_tasks": 270,
+  "config_hash": "8751a411457ef59ee3364db7bf66efef3be3db12745b55156c3b2b2aec9c39cd",
+  "files": {
+    "audit.json": "a9fe5b63e7899e372192581eb815caf34d5e0563336097256ea26998901bcd59",
+    "config.json": "3f7832174b10762886c03374fec67b0cb8448928ebc06e7d322ded536117697c",
+    "evaluation_table.csv": "9f8a2eb05f94c51f2cd0ccb34418cd73d3ed1beec79fffffefcb6789660f0dff",
+    "excluded_rows.csv": "a8d5dc744de58b1646c9376e77fb7cf487515434b548870e791f1851d0f9d1a2",
+    "kraken_reference.csv": "d56f0b9a95bdb7f9b276697adcc0b217567d4629def53a9b15afc643ba6fa0ae",
+    "ligand_features.csv": "e51724f98127a99ccd520fd75bd6422f778ca8cc71c058f0cf93ae14c511d2c2",
+    "ligand_mapping.csv": "b763eac50e3b5e01d435a9bc500559a4c70baeb3d1a4b256f78acc0450e2f0f1",
+    "model_table.csv": "6dbbfe64336b788a306177b8d9db9d346674e128580394c149a53dac3acc1b6a",
+    "pca_loadings.csv": "37f3f7ed21fc96d5bcd8044cf01cb0f764134ee01760cfa05edfb05f3db78eb9",
+    "pca_reference.json": "ffa90bb8cbde685da6d92f36a919dca68f690e0d7c3ce8a95346f7f6dd397256",
+    "pca_reference.npz": "26b11f56a212433d9ac50a6637c81c6517871e014c1314455a4b4267f01845f1",
+    "reactions.csv": "59309a987110878067910d8486b11c3d2cfa259114d699007cd185a1572a832c",
+    "sources.json": "351529111988af1f607e922bbbe47747da901dd64b3f05cd963db2d72cf03f64",
+    "splits.json": "79844e41d546cc83369c05fbc4d3f3ae20cd06a3a5bed2c410343e946cb015f8",
+    "splits.npz": "923f4fff8ed5c43f4d16b3b7056b46c3adbc73535457438682230a1a0966d02a",
+    "tasks.csv": "3685d994440a4f905cc2a75c90682d3bc3ff3d6374a71f4a1fa5b52ad7d0a906"
+  },
+  "bundle_id": "699ec23662b9fc789da6318c18e838e9aedf43b34c3c7a9274999109576b6e03"
+}

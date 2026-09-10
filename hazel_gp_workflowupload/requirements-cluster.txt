@@ -1,0 +1,5 @@
+-r requirements-common.txt
+# Install the CPU or CUDA wheel first, using the appropriate PyTorch index.
+torch==2.8.0
+gpytorch==1.15.2
+linear_operator==0.6.1

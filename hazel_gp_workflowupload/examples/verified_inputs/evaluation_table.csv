@@ -1,0 +1,5 @@
+method,definition,total_model_fits
+lolo,Hold out one ligand; repeat for every ligand,40
+iid_matched,Match each LOLO test size; 5 random repeats,200
+kfold,"Shuffled 5-fold, seed 42",25
+holdout,"Random 80%/20%, seed 42",5
