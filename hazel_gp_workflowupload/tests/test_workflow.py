@@ -11,7 +11,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF
 
-from hazel_gp.config import default_config, FIVE, TWO
+from hazel_gp.config import default_config, load_config, FIVE, TWO
 from hazel_gp.features import (ReferencePCA, ligand_table, fit_transform_fold, feature_frame,
                                model_columns, pc_scores_form)
 from hazel_gp.splits import make_splits, validate_split, load_split
@@ -187,7 +187,10 @@ def test_metrics_use_predictive_uncertainty_and_undefined_r2():
         regression_metrics([1], [1], [0])
 
 
-REAL_BUNDLE = Path(__file__).resolve().parents[1] / "data_hazel/prepared/group1_v1"
+_ROOT = Path(__file__).resolve().parents[1]
+# Follow the configured prepared directory rather than a pinned version, so the
+# integration check always runs against the bundle the current code produces.
+REAL_BUNDLE = _ROOT / load_config(_ROOT / "configs/default.json")["paths"]["prepared"]
 
 
 @pytest.mark.skipif(not REAL_BUNDLE.exists(), reason="Prepare original data first for integration checks")

@@ -17,7 +17,6 @@ def test_complete_benchmark_collection_and_integrity(tmp_path):
     cfg["features"]["models"] = ["selected_2"]
     cfg["data"].update(expected_rows=None, expected_ligands=None,
                         common_categorical=["substrate_pair"])
-    cfg["evaluation"]["iid_repeats"] = 2
     cfg["gp"].update(max_steps=3, min_steps=1, patience=2, threads=1)
     rng = np.random.default_rng(5)
     cols = ["vbur_vbur_boltz", "vbur_vbur_min", "vbur_vbur_delta", "dipolemoment_boltz",
@@ -46,13 +45,13 @@ def test_complete_benchmark_collection_and_integrity(tmp_path):
         run_task(bundle, runs, int(task_id), device="cpu")
     tables = collect_results(bundle, runs)
     assert tables["summary"].run_complete.all() and tables["summary"].complete_method.all()
-    assert len(tables["metrics_by_split"]) == 12
+    assert len(tables["metrics_by_split"]) == 10
     lolo = tables["predictions"].query("method == 'lolo'")
     direct_r2 = 1 - np.square(lolo.y_true - lolo.y_pred).sum() / np.square(lolo.y_true - lolo.y_true.mean()).sum()
     summary = tables["summary"].query("method == 'lolo'").set_index("aggregation")
     assert summary.loc["pooled_predictions", "r2"] == pytest.approx(direct_r2)
     assert abs(summary.loc["pooled_predictions", "r2"] - summary.loc["mean_split_metrics", "r2"]) > 0.1
-    assert not tables["summary"].query("method == 'iid_matched'").aggregation.eq("pooled_predictions").any()
+    assert tables["summary"].query("method == 'iid_matched'").aggregation.eq("pooled_predictions").any()
     # Completed jobs skip without overwriting their saved checkpoint.
     checkpoint = runs / "tasks/task_0000/model.pt"
     before = checkpoint.stat().st_mtime_ns

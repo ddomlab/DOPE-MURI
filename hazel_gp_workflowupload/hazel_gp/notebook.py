@@ -9,7 +9,7 @@ def export_controls(prepared, root):
     root = Path(root)
     directory = w.Text(value=str(root / prepared.config["paths"]["prepared"]), description="Prepared:",
                        layout=w.Layout(width="95%"), style={"description_width": "90px"})
-    archive = w.Text(value=str(root / "exports/hazel_gp_upload_v1.zip"), description="Upload ZIP:",
+    archive = w.Text(value=str(root / "exports/hazel_gp_upload_v2.zip"), description="Upload ZIP:",
                      layout=w.Layout(width="95%"), style={"description_width": "90px"})
     button = w.Button(description="Export reviewed inputs", button_style="success", layout=w.Layout(width="220px"))
     output = w.Output()

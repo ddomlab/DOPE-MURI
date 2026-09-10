@@ -1,0 +1,222 @@
+[
+  {
+    "split_id": "split_000",
+    "method": "lolo",
+    "reference_group": "AmPhos",
+    "repeat": 0,
+    "fold": 0,
+    "seed": null,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_001",
+    "method": "lolo",
+    "reference_group": "CataCXium A",
+    "repeat": 0,
+    "fold": 1,
+    "seed": null,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_002",
+    "method": "lolo",
+    "reference_group": "P(Cy)3",
+    "repeat": 0,
+    "fold": 2,
+    "seed": null,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_003",
+    "method": "lolo",
+    "reference_group": "P(Ph)3",
+    "repeat": 0,
+    "fold": 3,
+    "seed": null,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_004",
+    "method": "lolo",
+    "reference_group": "P(o-Tol)3",
+    "repeat": 0,
+    "fold": 4,
+    "seed": null,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_005",
+    "method": "lolo",
+    "reference_group": "P(tBu)3",
+    "repeat": 0,
+    "fold": 5,
+    "seed": null,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_006",
+    "method": "lolo",
+    "reference_group": "SPhos",
+    "repeat": 0,
+    "fold": 6,
+    "seed": null,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_007",
+    "method": "lolo",
+    "reference_group": "XPhos",
+    "repeat": 0,
+    "fold": 7,
+    "seed": null,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_008",
+    "method": "iid_matched",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 0,
+    "seed": 2110739950,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_009",
+    "method": "iid_matched",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 1,
+    "seed": 2110739950,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_010",
+    "method": "iid_matched",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 2,
+    "seed": 2110739950,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_011",
+    "method": "iid_matched",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 3,
+    "seed": 2110739950,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_012",
+    "method": "iid_matched",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 4,
+    "seed": 2110739950,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_013",
+    "method": "iid_matched",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 5,
+    "seed": 2110739950,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_014",
+    "method": "iid_matched",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 6,
+    "seed": 2110739950,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_015",
+    "method": "iid_matched",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 7,
+    "seed": 2110739950,
+    "n_train": 2688,
+    "n_test": 384
+  },
+  {
+    "split_id": "split_016",
+    "method": "kfold",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 0,
+    "seed": 42,
+    "n_train": 2457,
+    "n_test": 615
+  },
+  {
+    "split_id": "split_017",
+    "method": "kfold",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 1,
+    "seed": 42,
+    "n_train": 2457,
+    "n_test": 615
+  },
+  {
+    "split_id": "split_018",
+    "method": "kfold",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 2,
+    "seed": 42,
+    "n_train": 2458,
+    "n_test": 614
+  },
+  {
+    "split_id": "split_019",
+    "method": "kfold",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 3,
+    "seed": 42,
+    "n_train": 2458,
+    "n_test": 614
+  },
+  {
+    "split_id": "split_020",
+    "method": "kfold",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 4,
+    "seed": 42,
+    "n_train": 2458,
+    "n_test": 614
+  },
+  {
+    "split_id": "split_021",
+    "method": "holdout",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 0,
+    "seed": 42,
+    "n_train": 2457,
+    "n_test": 615
+  }
+]

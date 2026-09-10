@@ -53,7 +53,7 @@ Open **`01_prepare_local.ipynb`** and run its cells in order. It downloads from 
 - [Kraken descriptor CSV](https://raw.githubusercontent.com/doyle-lab-ucla/kraken_utils/main/kraken_features_only.csv)
 - [Kraken identifiers CSV](https://raw.githubusercontent.com/doyle-lab-ucla/kraken_utils/main/identifiers.csv)
 
-The new folders are `data_hazel/raw`, `data_hazel/prepared/group1_v1`, `data_hazel/runs`, and `exports`. Your original `data/` is never modified. Downloads are cached with SHA-256 hashes. Existing cached files are reused. For a new upstream snapshot, choose a new raw directory in the config; `download --refresh` is an explicit alternative that replaces the cached raw files.
+The new folders are `data_hazel/raw`, `data_hazel/prepared/group1_v2`, `data_hazel/runs`, and `exports`. Your original `data/` is never modified. Downloads are cached with SHA-256 hashes. Existing cached files are reused. For a new upstream snapshot, choose a new raw directory in the config; `download --refresh` is an explicit alternative that replaces the cached raw files.
 
 The notebook displays the cleanup audit, exclusions, ligand mapping/SMILES, model definitions, PCA variance/loadings, and the actual split counts before exporting. A feature grid names each encoded input for all five models, ligand features first and then the shared categorical block held constant across models; it shows the first `MAX_FEATURES_SHOWN` (25 by default) with a totals row, and the bundle records every name in `model_features.csv`. Its final **Export reviewed inputs** button writes the prepared folder and creates the upload ZIP. Change both output fields for a new version. Existing prepared folders and ZIP files are never overwritten. The original code remains in modules; the notebook holds settings and review controls.
 
@@ -69,7 +69,7 @@ cfg = load_config(root / "configs/default.json")
 download_sources(cfg, root)
 prepared = prepare_data(cfg, root)  # computes in memory; inspect before the next two lines
 bundle = export_prepared(prepared, root / cfg["paths"]["prepared"])
-create_upload_archive(root, bundle, root / "exports/hazel_gp_upload_v1.zip")
+create_upload_archive(root, bundle, root / "exports/hazel_gp_upload_v2.zip")
 ```
 
 Equivalent noninteractive commands (the `prepare` command explicitly exports immediately):
@@ -77,7 +77,7 @@ Equivalent noninteractive commands (the `prepare` command explicitly exports imm
 ```powershell
 python -m hazel_gp download
 python -m hazel_gp prepare
-python -m hazel_gp pack-inputs --bundle data_hazel/prepared/group1_v1 --output exports/hazel_gp_upload_v1.zip
+python -m hazel_gp pack-inputs --bundle data_hazel/prepared/group1_v2 --output exports/hazel_gp_upload_v2.zip
 ```
 
 For the verified source snapshot, cleanup returns **5,760 raw -> 3,712 after original solvent/ligand exclusions -> 3,072 Group1 rows**, with eight ligands and 384 rows per ligand. The configuration checks these counts and stops if the data unexpectedly change. It keeps Group1 reactant codes 1a-1d and 2a-2c, drops the original V2 solvent labels, and excludes the no-ligand/bidentate conditions. These are scope rules, not yield-based filtering.
@@ -109,7 +109,7 @@ Reaction-feature scaling, one-hot encoder fitting, and target standardization oc
 
 Default: GPyTorch `ExactGP`, zero mean on the train-standardized target, isotropic RBF, fixed unit signal variance, fixed Gaussian noise variance `1e-6` in standardized target units, float64. This matches the original sklearn model's statistical structure. Numerical jitter (`1e-8`) is separate from observation noise.
 
-Adam optimizes the training marginal likelihood, initially learning rate 0.01, maximum 400 steps, minimum 100 steps, with a training-objective plateau check. This optimizer differs from sklearn's L-BFGS-B; identical fitted length scales or final scores are not promised. There are no hyperparameter priors or HMC sampling. `restarts=5` performs five independent initializations per fit and keeps the one with the best **training** marginal likelihood; no test data is consulted in that choice. Restarts multiply optimizer work per fit by roughly five, which dominates the walltime estimate a pilot should produce. Objective traces and stop reasons are returned. Reaching 400 steps does not assert convergence; examine the histories before publishing results.
+Adam optimizes the training marginal likelihood, initially learning rate 0.01, maximum 400 steps, minimum 100 steps, with a training-objective plateau check. This optimizer differs from sklearn's L-BFGS-B; identical fitted length scales or final scores are not promised. There are no hyperparameter priors or HMC sampling. `restarts=5` performs five independent initializations per fit and keeps the one with the best **training** marginal likelihood; no test data is consulted in that choice. Restarts multiply optimizer work per fit by roughly five, which dominates the walltime estimate a pilot should produce. Objective traces and stop reasons are returned. Reaching 400 steps does not assert convergence; examine the histories before publishing results. The plateau check can only fire at a step at or past `patience`, so a cap at or below it leaves the check unreachable and the stop reason is `max_steps_plateau_unreachable` rather than `max_steps`; `fit.json` records the same distinction as `plateau_reachable`. A short pilot always reports the unreachable form, so its stop reasons measure walltime and memory only and say nothing about convergence.
 
 `configs/default.json` exposes optional ARD, learned signal scale, and learned Gaussian noise. Keep the same settings across all five models for a comparison. These options are statistical changes, so create a new prepared configuration and run directory when changing them. Do not select kernels or settings based on outer test performance; a performance-driven search requires an additional inner validation procedure.
 
@@ -154,7 +154,7 @@ First pilot one full-size task per representation, with ten optimizer steps, in 
 bash hazel/slurm/GP_pilot_GPU_arg.sh
 ```
 
-The pilot reads the first task ID of each representation from `inputs/tasks.csv` instead of hardcoding them, because the registry is model-major and its split count changes whenever the bundle is re-prepared. The shipped bundle holds 270 tasks, 54 splits per representation, so those IDs are 0, 54, 108, 162 and 216. Set `pilot_task_ids` to pilot a chosen set instead. Monitor with `squeue -u "$USER"`, or `bjobs` under LSF. After completion inspect fit times, convergence histories, warnings and memory usage. To report the partial pilot, set `allow_partial=1` and `run_tag="pilot_v1"` in `GP_collect_CPU_arg.sh` and submit it; full collection intentionally rejects a partial pilot.
+The pilot reads the first task ID of each representation from `inputs/tasks.csv` instead of hardcoding them, because the registry is model-major and its split count changes whenever the bundle is re-prepared. The current bundle holds 110 tasks, 22 splits per representation, so those IDs are 0, 22, 44, 66 and 88. The retired `data_hazel/prepared/group1_v1` holds 270 because it predates matched IID becoming a non-repeating partition; its matched-IID folds test some rows up to 17 times and leave 20 untested, so collection rejects it. Re-prepare rather than reuse it. Set `pilot_task_ids` to pilot a chosen set instead. Monitor with `squeue -u "$USER"`, or `bjobs` under LSF. After completion inspect fit times, convergence histories, warnings and memory usage. To report the partial pilot, set `allow_partial=1` and `run_tag="pilot_v1"` in `GP_collect_CPU_arg.sh` and submit it; full collection intentionally rejects a partial pilot.
 
 Production, after choosing sufficient walltime from the pilot:
 
@@ -223,4 +223,4 @@ With the preserved seed 42, the 80/20 holdout has the same test membership as th
 - `hazel/`: `setup_environment.sh`, plus `slurm/` and `lsf/` variants of the same six submissions - preflight, pilot, GPU, CPU, retry and collect.
 - `tests/`, `VALIDATION.md`: correctness tests and what was actually verified.
 
-Run `python -m pytest -q tests` after installing the test requirements. The real-data integration check runs when `data_hazel/prepared/group1_v1` is present. Use `python -m hazel_gp --help` for the complete command interface. See [GPyTorch's ExactGP tutorial](https://docs.gpytorch.ai/en/stable/examples/01_Exact_GPs/Simple_GP_Regression.html) for the mean/kernel/likelihood structure.
+Run `python -m pytest -q tests` after installing the test requirements. The real-data integration check runs when the prepared directory named in `configs/default.json` is present. Use `python -m hazel_gp --help` for the complete command interface. See [GPyTorch's ExactGP tutorial](https://docs.gpytorch.ai/en/stable/examples/01_Exact_GPs/Simple_GP_Regression.html) for the mean/kernel/likelihood structure.

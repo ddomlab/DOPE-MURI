@@ -80,6 +80,13 @@ def cpu_state(model):
 def fit_exact(x, y, settings, seed=42, device="cpu"):
     """Target-standardized marginal-likelihood optimization; never reads test targets."""
     torch.set_num_threads(settings["threads"])
+    # The plateau test fires only at a step at or past `patience` that is also at or
+    # past `min_steps`, so a cap at or below `patience` leaves it unreachable: a short
+    # pilot then ends at the cap having never been offered the check. Report that case
+    # distinctly rather than as an ordinary `max_steps` stop, which reads as a fit that
+    # was still descending after a fair plateau test.
+    plateau_reachable = (settings["max_steps"] >= settings["patience"] + 1
+                         and settings["max_steps"] >= settings["min_steps"])
     dtype = torch.float64
     train_x = torch.as_tensor(x, dtype=dtype, device=device)
     mean = float(np.mean(y))
@@ -110,7 +117,7 @@ def fit_exact(x, y, settings, seed=42, device="cpu"):
             optimizer = torch.optim.Adam([p for p in model.parameters() if p.requires_grad], lr=settings["learning_rate"])
             objective = gpytorch.mlls.ExactMarginalLogLikelihood(likelihood, model)
             local_best, significant_best, stale = float("inf"), float("inf"), 0
-            stop_reason = "max_steps"
+            stop_reason = "max_steps" if plateau_reachable else "max_steps_plateau_unreachable"
             for step in range(settings["max_steps"]):
                 optimizer.zero_grad(set_to_none=True)
                 loss = -objective(model(train_x), train_y)
@@ -151,6 +158,7 @@ def fit_exact(x, y, settings, seed=42, device="cpu"):
     model.eval()
     likelihood.eval()
     summary = {"fit_seconds": time.perf_counter() - t0, "target_mean": mean, "target_std": std,
+               "plateau_reachable": plateau_reachable,
                "best_negative_mll_per_point": best_loss, "selected_restart": best_restart,
                "restart_summaries": restart_summaries, "warnings": captured,
                "lengthscales": model.base_kernel.lengthscale.detach().cpu().reshape(-1).tolist(),
