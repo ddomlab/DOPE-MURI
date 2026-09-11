@@ -1,0 +1,26 @@
+{
+  "state": "completed",
+  "run_id": "6e1a5844dd278027c5d587b29a79865d9509607074557de38fc5b96c478f67cb",
+  "task": {
+    "task_id": 106,
+    "model": "pc_scores",
+    "split_id": "split_018",
+    "method": "kfold",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 2,
+    "seed": "42.0",
+    "n_train": 2458,
+    "n_test": 614,
+    "fit_seed": 42
+  },
+  "completed_utc": "2026-09-11T07:42:34.768333+00:00",
+  "output_hashes": {
+    "predictions.csv": "b3bd2d18d8807291fadfa9aa6a68e13f79bcdc706709d970f26d0d9482c90491",
+    "training_history.csv": "9e4925d2826076dbae7af6ad465c1d65bd2b1b8a2b22d9ad658aa4310a3f70d3",
+    "metrics.json": "738e61b165878e36ab2e02e932d9fe911999573d77ceed9c18183c21f19b0b26",
+    "fit.json": "bc62df7885ea4a18d9c9431ffef39799259d2ccfd7f332557f24c8dd9d19a9a6",
+    "preprocessor.joblib": "9a161744398534ca66c091e2504a22d79c07f189281945901b80b5a2504f7b3c",
+    "model.pt": "6c5ec0bb48e4be6d917a186936ee58c91376d938743be3eb8e0923fa04e5475f"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "state": "completed",
+  "run_id": "6e1a5844dd278027c5d587b29a79865d9509607074557de38fc5b96c478f67cb",
+  "task": {
+    "task_id": 0,
+    "model": "ligand_ohe",
+    "split_id": "split_000",
+    "method": "lolo",
+    "reference_group": "AmPhos",
+    "repeat": 0,
+    "fold": 0,
+    "seed": "",
+    "n_train": 2688,
+    "n_test": 384,
+    "fit_seed": 42
+  },
+  "completed_utc": "2026-09-11T00:40:55.253855+00:00",
+  "output_hashes": {
+    "predictions.csv": "e765ed909e0b7a87e79992968af7ce092b272a29662b67cedb616e7a38ccbc82",
+    "training_history.csv": "ef32dce2279592da1b061a7fc36b86b8f56396271fdc40198db0332b3ed85a28",
+    "metrics.json": "7ed33e0e76fdcf0327f79208b929e5eb25b4758f97122c855b1fa6fb2930253b",
+    "fit.json": "ac65625bd2c939950bbbe8bd2042979d9149c539a8612bab24f931e14e881fa2",
+    "preprocessor.joblib": "a9e6bc5141342a0d54f6cd9d64c5d5adfaa047c8a61eca5b9f312d64b1acd70a",
+    "model.pt": "b632ce36cd43284ef4192281481cbda1cdfe5e62a922956d93ce3a547065faf8"
+  }
+}

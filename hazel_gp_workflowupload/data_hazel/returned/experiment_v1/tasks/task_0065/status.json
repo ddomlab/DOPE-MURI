@@ -1,0 +1,26 @@
+{
+  "state": "completed",
+  "run_id": "6e1a5844dd278027c5d587b29a79865d9509607074557de38fc5b96c478f67cb",
+  "task": {
+    "task_id": 65,
+    "model": "selected_2",
+    "split_id": "split_021",
+    "method": "holdout",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 0,
+    "seed": "42.0",
+    "n_train": 2457,
+    "n_test": 615,
+    "fit_seed": 42
+  },
+  "completed_utc": "2026-09-11T06:11:12.277195+00:00",
+  "output_hashes": {
+    "predictions.csv": "4454c3658dccd387f53b040ad967bab61477b3d2d29b32c0cc1cfff81dea8586",
+    "training_history.csv": "380106ed49515c59ad674cb3ef35115d29cec57a3689d140fdd0c36f32af3141",
+    "metrics.json": "c89870b1c5ff2d2fce126701212e9616979f7743d6a6369c61b195cbe80cc8f9",
+    "fit.json": "28f98964fcd1925cc16722d6c7aa9113a87c0dc5fa81f0fac793c9beaa592bb4",
+    "preprocessor.joblib": "e7abec7d72d8afb6643478b5196f94a3a4310c5e87bdd0310ae712ec33bf8f0e",
+    "model.pt": "2dee586a481f9b85786e3b9791477b7378e8f356a77649c9c1fbd55a3854f7e5"
+  }
+}

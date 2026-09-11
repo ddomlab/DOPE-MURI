@@ -1,0 +1,26 @@
+{
+  "state": "completed",
+  "run_id": "6e1a5844dd278027c5d587b29a79865d9509607074557de38fc5b96c478f67cb",
+  "task": {
+    "task_id": 66,
+    "model": "pc_top",
+    "split_id": "split_000",
+    "method": "lolo",
+    "reference_group": "AmPhos",
+    "repeat": 0,
+    "fold": 0,
+    "seed": "",
+    "n_train": 2688,
+    "n_test": 384,
+    "fit_seed": 42
+  },
+  "completed_utc": "2026-09-11T00:43:24.208206+00:00",
+  "output_hashes": {
+    "predictions.csv": "1459843b939f409430c2aa0f7f61b5c3a437b7906f94e653dc62452db64ca028",
+    "training_history.csv": "4832f4b4b67d61f0644dae6f967786ef8c173a991027524a42fc8e493f238fc7",
+    "metrics.json": "0e492656a0c28bf41b30eb6e4d2899eaf67c70e0726c5c9ffd0f20118bcea925",
+    "fit.json": "d13c638b3c1348cc74d529320297f9975d13b1a3ebe21115527b1bf7425b5ca8",
+    "preprocessor.joblib": "7c6635a02c94c3d55c2f1cf828abbf59862ead4db1af27d71bd1ae9fd9085853",
+    "model.pt": "246138db97e0198774b9d543cd9cedd6e6d441145b61fba98b634b35fb180a0a"
+  }
+}

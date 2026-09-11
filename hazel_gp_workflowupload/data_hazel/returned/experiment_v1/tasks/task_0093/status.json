@@ -1,0 +1,26 @@
+{
+  "state": "completed",
+  "run_id": "6e1a5844dd278027c5d587b29a79865d9509607074557de38fc5b96c478f67cb",
+  "task": {
+    "task_id": 93,
+    "model": "pc_scores",
+    "split_id": "split_005",
+    "method": "lolo",
+    "reference_group": "P(tBu)3",
+    "repeat": 0,
+    "fold": 5,
+    "seed": "",
+    "n_train": 2688,
+    "n_test": 384,
+    "fit_seed": 42
+  },
+  "completed_utc": "2026-09-11T07:11:11.024534+00:00",
+  "output_hashes": {
+    "predictions.csv": "858c8f0569471e9b7a209bcf00b3a43a6b0e23baccfc9f6c83da93cc5ff9dc0c",
+    "training_history.csv": "08de923119e73ed23d9a42e943236fa667fd42906f9b688154fedfc304cb28bb",
+    "metrics.json": "b30970b693d073767d0f594e77d1e781ac36e1cf28bf6366b8074a91ad9c0046",
+    "fit.json": "c4b837d5b3c95c3bb35af4ca841f6af1e25a5dcd094d8986bf925f53f720d987",
+    "preprocessor.joblib": "e90a4841b9686ca0678ca828170781f1c2fffe102caca27365bcc503f34707c6",
+    "model.pt": "4f2b12069b33cd841acdf3b5fa5b403eab6c44b13322cde91c8642863e8370e5"
+  }
+}

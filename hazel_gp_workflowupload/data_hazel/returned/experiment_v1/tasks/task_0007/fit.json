@@ -1,0 +1,150 @@
+{
+  "fit_seconds": 95.50852147117257,
+  "target_mean": 47.375907738095236,
+  "target_std": 30.50049313970673,
+  "plateau_reachable": true,
+  "best_negative_mll_per_point": 0.4584470777058474,
+  "selected_restart": 1,
+  "restart_summaries": [
+    {
+      "restart": 0,
+      "steps": 142,
+      "stop_reason": "training_objective_plateau",
+      "best_negative_mll_per_point": 0.45844707844827237
+    },
+    {
+      "restart": 1,
+      "steps": 100,
+      "stop_reason": "training_objective_plateau",
+      "best_negative_mll_per_point": 0.4584470777058474
+    },
+    {
+      "restart": 2,
+      "steps": 400,
+      "stop_reason": "max_steps",
+      "best_negative_mll_per_point": 6.434766329322144
+    },
+    {
+      "restart": 3,
+      "steps": 163,
+      "stop_reason": "training_objective_plateau",
+      "best_negative_mll_per_point": 0.4584470891761075
+    },
+    {
+      "restart": 4,
+      "steps": 140,
+      "stop_reason": "training_objective_plateau",
+      "best_negative_mll_per_point": 0.45844713865408926
+    }
+  ],
+  "warnings": [],
+  "lengthscales": [
+    1.3313525172553016
+  ],
+  "noise_variance_standardized": 9.999999974752433e-07,
+  "noise_variance_target_units": 0.0009302800794165664,
+  "outputscale": 1.0,
+  "task": {
+    "task_id": 7,
+    "model": "ligand_ohe",
+    "split_id": "split_007",
+    "method": "lolo",
+    "reference_group": "XPhos",
+    "repeat": 0,
+    "fold": 7,
+    "seed": "",
+    "n_train": 2688,
+    "n_test": 384,
+    "fit_seed": 42
+  },
+  "n_train": 2688,
+  "n_test": 384,
+  "n_features": 35,
+  "feature_names": [
+    "cat__ligand_AmPhos",
+    "cat__ligand_CataCXium A",
+    "cat__ligand_P(Cy)3",
+    "cat__ligand_P(Ph)3",
+    "cat__ligand_P(o-Tol)3",
+    "cat__ligand_P(tBu)3",
+    "cat__ligand_SPhos",
+    "cat__Reactant_1_Short_Hand_1a, 6-Cl-Q",
+    "cat__Reactant_1_Short_Hand_1b, 6-Br-Q",
+    "cat__Reactant_1_Short_Hand_1c, 6-OTf-Q",
+    "cat__Reactant_1_Short_Hand_1d, 6-I-Q",
+    "cat__Reagent_1_Short_Hand_CsF",
+    "cat__Reagent_1_Short_Hand_Et3N",
+    "cat__Reagent_1_Short_Hand_K3PO4",
+    "cat__Reagent_1_Short_Hand_KOH",
+    "cat__Reagent_1_Short_Hand_LiOtBu",
+    "cat__Reagent_1_Short_Hand_NaHCO3",
+    "cat__Reagent_1_Short_Hand_NaOH",
+    "cat__Reagent_1_Short_Hand_None",
+    "cat__Solvent_1_Short_Hand_DMF",
+    "cat__Solvent_1_Short_Hand_MeCN",
+    "cat__Solvent_1_Short_Hand_MeOH",
+    "cat__Solvent_1_Short_Hand_THF",
+    "cat__substrate_pair_1a_2a",
+    "cat__substrate_pair_1a_2b",
+    "cat__substrate_pair_1a_2c",
+    "cat__substrate_pair_1b_2a",
+    "cat__substrate_pair_1b_2b",
+    "cat__substrate_pair_1b_2c",
+    "cat__substrate_pair_1c_2a",
+    "cat__substrate_pair_1c_2b",
+    "cat__substrate_pair_1c_2c",
+    "cat__substrate_pair_1d_2a",
+    "cat__substrate_pair_1d_2b",
+    "cat__substrate_pair_1d_2c"
+  ],
+  "unknown_categories": {
+    "ligand": [
+      "XPhos"
+    ],
+    "Reactant_1_Short_Hand": [],
+    "Reagent_1_Short_Hand": [],
+    "Solvent_1_Short_Hand": [],
+    "substrate_pair": []
+  },
+  "device": "cuda",
+  "gpu_name": "NVIDIA L40",
+  "versions": {
+    "python": "3.12.14",
+    "platform": "Linux-5.14.0-611.5.1.el9_7.x86_64-x86_64-with-glibc2.34",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "torch": "2.8.0+cu126",
+    "gpytorch": "1.15.2",
+    "linear_operator": "0.6.1"
+  },
+  "slurm_job_id": "801713",
+  "settings": {
+    "kernel": "rbf",
+    "ard": false,
+    "learn_outputscale": false,
+    "learn_noise": false,
+    "noise_variance": 1e-06,
+    "initial_lengthscale": 1.0,
+    "lengthscale_bounds": [
+      0.01,
+      1000.0
+    ],
+    "learning_rate": 0.01,
+    "max_steps": 400,
+    "min_steps": 100,
+    "patience": 60,
+    "relative_tolerance": 1e-06,
+    "restarts": 5,
+    "cholesky_jitter": 1e-08,
+    "solver": "cholesky",
+    "cg_tolerance": 1e-05,
+    "max_cg_iterations": 2000,
+    "prediction_batch_size": 1024,
+    "threads": 4,
+    "save_checkpoints": true,
+    "device": "cuda"
+  },
+  "run_id": "6e1a5844dd278027c5d587b29a79865d9509607074557de38fc5b96c478f67cb"
+}

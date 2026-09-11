@@ -1,0 +1,26 @@
+{
+  "state": "completed",
+  "run_id": "6e1a5844dd278027c5d587b29a79865d9509607074557de38fc5b96c478f67cb",
+  "task": {
+    "task_id": 73,
+    "model": "pc_top",
+    "split_id": "split_007",
+    "method": "lolo",
+    "reference_group": "XPhos",
+    "repeat": 0,
+    "fold": 7,
+    "seed": "",
+    "n_train": 2688,
+    "n_test": 384,
+    "fit_seed": 42
+  },
+  "completed_utc": "2026-09-11T06:28:28.108541+00:00",
+  "output_hashes": {
+    "predictions.csv": "ea988e5f2380b583a4ef5833faaf4388dce545d00a09c8963a045740d29c4abe",
+    "training_history.csv": "2723824436d7504fbaef79b0491d57b22c9bb0834200a7aa08cd921ddac1ec26",
+    "metrics.json": "a3ce43013f2ad6060435977aed9a2a84c155e1bcf1e8f0491e337a7ffbf03fe3",
+    "fit.json": "b9a0bc5247da4441b2c7337267c88f9de30af8f8318aa03e642b34033b82ca38",
+    "preprocessor.joblib": "62457f00a0fd7299096b639f1be7cdb7223f2080206cf0bc23509ab7bf6b672d",
+    "model.pt": "126fcb893d8ff4fa01b1d5827e3ae75f6bf980b18a32f29f20c13c35cf5c63c6"
+  }
+}

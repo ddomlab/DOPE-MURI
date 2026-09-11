@@ -1,0 +1,26 @@
+{
+  "state": "completed",
+  "run_id": "6e1a5844dd278027c5d587b29a79865d9509607074557de38fc5b96c478f67cb",
+  "task": {
+    "task_id": 101,
+    "model": "pc_scores",
+    "split_id": "split_013",
+    "method": "iid_matched",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 5,
+    "seed": "2110739950.0",
+    "n_train": 2688,
+    "n_test": 384,
+    "fit_seed": 42
+  },
+  "completed_utc": "2026-09-11T07:31:27.650466+00:00",
+  "output_hashes": {
+    "predictions.csv": "2876a84bf97800d0283265ed1f2fa19b3ded1cb2bfefab62193e2fff204d51b9",
+    "training_history.csv": "135db47836e8f1fae1035f263940a40431597499a00350c2a37ea253b9b6c555",
+    "metrics.json": "c7c4d0a10f50ee38bef2ddd74b20603224fea213524b9830717701884756b8f0",
+    "fit.json": "16fd032b9433e38c6be04e2d6224cc23bc8682db9803f05622ee7fc1f805b915",
+    "preprocessor.joblib": "a3f20dcb574c9fbbc78ccc55880485a8952d20ce84185a08dd8fc91095084e32",
+    "model.pt": "2eccca4d255449f0fbac586b30191916a043f3f9a2a380164c26746bccdba1b4"
+  }
+}

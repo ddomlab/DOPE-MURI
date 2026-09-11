@@ -1,0 +1,26 @@
+{
+  "state": "completed",
+  "run_id": "6e1a5844dd278027c5d587b29a79865d9509607074557de38fc5b96c478f67cb",
+  "task": {
+    "task_id": 77,
+    "model": "pc_top",
+    "split_id": "split_011",
+    "method": "iid_matched",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 3,
+    "seed": "2110739950.0",
+    "n_train": 2688,
+    "n_test": 384,
+    "fit_seed": 42
+  },
+  "completed_utc": "2026-09-11T06:37:33.576467+00:00",
+  "output_hashes": {
+    "predictions.csv": "7e5d650b06cd93b55a69fee1ee3d1b7afbda2eff9328fb779c4c0fe719b02f2a",
+    "training_history.csv": "0d5068c4d735b4febd4025526bce6046ca20917ea421f1d5fe5efb6cf9aa55f4",
+    "metrics.json": "854c6a51ec58ca0ae3e7c51313d838f1d02081539990aa0c2824cbde0c217a00",
+    "fit.json": "5edbc748f947885ff875bcb96731dbf2f4cc0ecaf1f8837e4356e9e66abbd72b",
+    "preprocessor.joblib": "6a6c97f4e41155a4817c15873e8229851f50a7395964c184b7e373b7d7e5e051",
+    "model.pt": "af06412adb58465e1fe04f90b8799569c00ec4a868d38e10f28c17db28b1a326"
+  }
+}

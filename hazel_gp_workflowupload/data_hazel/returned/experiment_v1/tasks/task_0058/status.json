@@ -1,0 +1,26 @@
+{
+  "state": "completed",
+  "run_id": "6e1a5844dd278027c5d587b29a79865d9509607074557de38fc5b96c478f67cb",
+  "task": {
+    "task_id": 58,
+    "model": "selected_2",
+    "split_id": "split_014",
+    "method": "iid_matched",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 6,
+    "seed": "2110739950.0",
+    "n_train": 2688,
+    "n_test": 384,
+    "fit_seed": 42
+  },
+  "completed_utc": "2026-09-11T05:57:07.281824+00:00",
+  "output_hashes": {
+    "predictions.csv": "6095890e876dff845d3e66283376517fca6f20a9f18c1b26bcfec701e5e989a3",
+    "training_history.csv": "cd82cbe999cf1fca7d783a4503e6f4c530df3a876fcd0f9dc59b219689778b54",
+    "metrics.json": "337d0220b993dbd866148087db920ad2c0c2198abef9be28a9947b9a08ad1ad9",
+    "fit.json": "0e84614a505c54f30db26aaa7f1d5459a66c471573ed8e08e05b2b030797efd6",
+    "preprocessor.joblib": "73f7ae094fe872a982188a171f2f2e5d03b6f71802257076552bc7a45a0a28cf",
+    "model.pt": "d2ef61b607c155d200f5eeda2f4b1255713263095ba5422bdb841ebd2963f932"
+  }
+}
