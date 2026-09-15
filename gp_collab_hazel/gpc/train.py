@@ -137,7 +137,7 @@ def run_task(bundle, runs, model: str, method: str, cfg: dict) -> Path:
     write_json(out / "meta.json", {
         "model": model, "method": method, "seed": seed,
         "stratify": cfg["run"]["stratify"], "n_folds": len(folds),
-        "n_rows": len(reactions), "config": cfg,
+        "n_rows": len(reactions), "n_features": int(X.shape[1]), "config": cfg,
         "device": "cuda" if use_gpu else "cpu",
         "versions": {
             "python": platform.python_version(),
