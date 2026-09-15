@@ -34,7 +34,14 @@ else
     epochs=""
 fi
 
-n_tasks=$(cd "$project_root" && python -m gpc tasks | tail -n +2 | wc -l)
+# Read the registry with the installed environment's interpreter, so the
+# script works from a bare login shell with no conda env activated.
+env_python="${conda_env}/bin/python"
+if [[ ! -x "$env_python" ]]; then
+    echo "No interpreter at ${env_python}. Run hazel/setup_environment.sh first." >&2
+    exit 1
+fi
+n_tasks=$(cd "$project_root" && "$env_python" -m gpc tasks | tail -n +2 | wc -l)
 if [[ -z "$n_tasks" || "$n_tasks" -eq 0 ]]; then
     echo "Could not read the task registry from ${project_root}." >&2
     exit 1
