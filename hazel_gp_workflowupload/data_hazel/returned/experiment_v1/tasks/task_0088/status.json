@@ -1,0 +1,26 @@
+{
+  "state": "completed",
+  "run_id": "6e1a5844dd278027c5d587b29a79865d9509607074557de38fc5b96c478f67cb",
+  "task": {
+    "task_id": 88,
+    "model": "pc_scores",
+    "split_id": "split_000",
+    "method": "lolo",
+    "reference_group": "AmPhos",
+    "repeat": 0,
+    "fold": 0,
+    "seed": "",
+    "n_train": 2688,
+    "n_test": 384,
+    "fit_seed": 42
+  },
+  "completed_utc": "2026-09-11T00:46:10.457607+00:00",
+  "output_hashes": {
+    "predictions.csv": "3469206f4b962c28e8854e40f156562d6a61c84e6d33d953e47cb35e5411dafc",
+    "training_history.csv": "fb552ed37f312e346f6cd2a5780401dcbe14773d4af7864c15494bc4e9b22693",
+    "metrics.json": "968e71fb237b2c3e271c68fa44a9be76af71a0ea6646815c4db0743745871fc0",
+    "fit.json": "d993d65994e9e7cf307bde7d2b23c67c320a2f6592733f71f31418ef3f64cc4f",
+    "preprocessor.joblib": "fb6b4650134cfa5fd6a88b4752de1bbafb3d63ba6e739d4f6378eab778c1e51b",
+    "model.pt": "5f93553c79109573e39b026029de12fa0601edd7aed6a46ffae8a6695703d8f3"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "state": "completed",
+  "run_id": "6e1a5844dd278027c5d587b29a79865d9509607074557de38fc5b96c478f67cb",
+  "task": {
+    "task_id": 89,
+    "model": "pc_scores",
+    "split_id": "split_001",
+    "method": "lolo",
+    "reference_group": "CataCXium A",
+    "repeat": 0,
+    "fold": 1,
+    "seed": "",
+    "n_train": 2688,
+    "n_test": 384,
+    "fit_seed": 42
+  },
+  "completed_utc": "2026-09-11T07:01:14.271118+00:00",
+  "output_hashes": {
+    "predictions.csv": "830737b14989735a620366657df90fca9ecdecdbfcb0a2bacfd88ea82764d861",
+    "training_history.csv": "dd325e23297bd81b42d7a40c6971373a521a27a95f444360d8f98f73b6b80114",
+    "metrics.json": "34528598b7b686ace85cb788ddddff8c1458a9394677ea25aa59339019336319",
+    "fit.json": "299d3e8d459e9444672f3ef8550de3db413de5f9f746ac63b7ade02960935e9a",
+    "preprocessor.joblib": "3109baf466628ec65db3475fe2621b3370f2221d8619357a15b0feb73b5c231c",
+    "model.pt": "83ac772156964cd6e34afc0e2a6281d7a5896e5e1152f6b63d82ba4fa348e6a5"
+  }
+}

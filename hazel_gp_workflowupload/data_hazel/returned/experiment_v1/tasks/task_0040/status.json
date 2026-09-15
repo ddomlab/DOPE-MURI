@@ -1,0 +1,26 @@
+{
+  "state": "completed",
+  "run_id": "6e1a5844dd278027c5d587b29a79865d9509607074557de38fc5b96c478f67cb",
+  "task": {
+    "task_id": 40,
+    "model": "selected_5",
+    "split_id": "split_018",
+    "method": "kfold",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 2,
+    "seed": "42.0",
+    "n_train": 2458,
+    "n_test": 614,
+    "fit_seed": 42
+  },
+  "completed_utc": "2026-09-11T05:18:11.096280+00:00",
+  "output_hashes": {
+    "predictions.csv": "ecda7269b2c3c78a47e00a1ec2a113a3be51c34bfec57521b87f6293a66f5e27",
+    "training_history.csv": "414e7a7e64c4825d1c1ee6f038f9f991e75cdf679fd316187cd2e3dd56f36be0",
+    "metrics.json": "ff706e611afdaa7cd43bd90b7b223aeb9c5ba2c690b0551978815f1adc71492e",
+    "fit.json": "9de960f5cb9338cb376f90d7e550da83a61a86888429e73b05e61c88e4c9165f",
+    "preprocessor.joblib": "65235d0f82842cc91f1d94cee1d67e547396ea74a0c302e49b820737e243a110",
+    "model.pt": "8093993144f35d33de96988cc485ec8226af5ca9cf0032ed9abc3b0972f1fa61"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "state": "completed",
+  "run_id": "6e1a5844dd278027c5d587b29a79865d9509607074557de38fc5b96c478f67cb",
+  "task": {
+    "task_id": 51,
+    "model": "selected_2",
+    "split_id": "split_007",
+    "method": "lolo",
+    "reference_group": "XPhos",
+    "repeat": 0,
+    "fold": 7,
+    "seed": "",
+    "n_train": 2688,
+    "n_test": 384,
+    "fit_seed": 42
+  },
+  "completed_utc": "2026-09-11T05:41:14.291096+00:00",
+  "output_hashes": {
+    "predictions.csv": "f70f21a94cb6359b3b549db579b9d34baa17536a6308a819007fa24c2dce6161",
+    "training_history.csv": "2f0722619e8084c1f83837fafa2f1d15126c399ed0243b49fab3271a6f72f8e6",
+    "metrics.json": "db03e92beab52a6e77b35d5eaa364594b6c0097ca8ec4ffd8de588023c61d003",
+    "fit.json": "3fd161b4cb662780169a5e207ca80a35e11aa55d9af09f9956af304b3489861c",
+    "preprocessor.joblib": "0c1d84975e65d97696a3b9856a166a276fd67a3f296c0a5c4e738d2509be4c38",
+    "model.pt": "b875db9482e800908418086b8501c2e5d6276ed11a338f37f656bc5bec5a9273"
+  }
+}

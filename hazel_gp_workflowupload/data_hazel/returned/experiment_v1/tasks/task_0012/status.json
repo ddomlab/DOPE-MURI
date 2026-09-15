@@ -1,0 +1,26 @@
+{
+  "state": "completed",
+  "run_id": "6e1a5844dd278027c5d587b29a79865d9509607074557de38fc5b96c478f67cb",
+  "task": {
+    "task_id": 12,
+    "model": "ligand_ohe",
+    "split_id": "split_012",
+    "method": "iid_matched",
+    "reference_group": "",
+    "repeat": 0,
+    "fold": 4,
+    "seed": "2110739950.0",
+    "n_train": 2688,
+    "n_test": 384,
+    "fit_seed": 42
+  },
+  "completed_utc": "2026-09-11T04:19:06.843158+00:00",
+  "output_hashes": {
+    "predictions.csv": "654f9d22ac56a3ad2b8fa371203e0fcaf57f1ffd6ff40116d82fb5f8ec582765",
+    "training_history.csv": "d8c0ed46604192100f50897bd180b507112268570341a686824afeaa8ff79493",
+    "metrics.json": "be4ddc330a26a68157fd7d1da242ae180724c540844f9540d0d94d31c83b11e1",
+    "fit.json": "36769a5059b03630cb9d42aa10381dcddb89f2dac2130d2be6a96329f579a2c8",
+    "preprocessor.joblib": "718d7b05a6a1dd4a86c52b11992d6faa6ece50fc4abc529c61544a44c1ef655b",
+    "model.pt": "86397c907e46763174c4370695c8a8f560f8ab819e08337df15a181683248f30"
+  }
+}
