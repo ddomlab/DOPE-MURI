@@ -150,7 +150,12 @@ def export(bundle, runs, out=None, hazel_method_names: bool = False) -> Path:
 
         out_frame = pd.DataFrame({
             "row_id": reactions.iloc[fold]["row_id"].to_numpy(),
-            "Reaction_No": reactions.iloc[fold]["Reaction_No"].to_numpy(),
+            # hazel_gp's schema carries Reaction_No. The Perera bundle has that
+            # column; this one identifies wells by plate/row/col instead, so fall
+            # back to the canonical 1-based row number, which is what row_id
+            # encodes ("reaction:N") and so keeps the two consistent.
+            "Reaction_No": (reactions.iloc[fold]["Reaction_No"].to_numpy()
+                            if "Reaction_No" in reactions.columns else fold + 1),
             "ligand": reactions.iloc[fold][GROUP].to_numpy(),
             "test_index": fold,
             "task_id": task["task_id"], "model": task["model"],
