@@ -5,7 +5,7 @@
     "runs": "runs/experiment_v1"
   },
   "run": {
-    "models": ["ligand_ohe", "selected_5", "selected_2", "pc_top", "pc_scores"],
+    "models": ["ligand_ohe", "selected_2", "selected_5", "pc_top", "pc_scores"],
     "methods": ["lolo", "iid_stratified_8", "kfold_stratified_5"],
     "seed": 42,
     "stratify": true,

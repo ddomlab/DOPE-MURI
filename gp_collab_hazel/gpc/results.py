@@ -124,6 +124,12 @@ def grouped_predictions(predictions, model, method="iid_matched"):
 
 
 MODEL_LABELS = {"pc_scores": "PC loading"}
+# Canonical left-to-right order for every figure and table, so the hazel and
+# rxnpredict reviews read the same way regardless of the order a run's config
+# happened to list its models in. Anything unlisted keeps its collected order
+# and follows these.
+MODEL_ORDER = ["ligand_ohe", "selected_2", "selected_5", "pc_top", "pc_scores",
+               "rxnpredict_full", "rxnpredict_full_ohe"]
 METHOD_LABELS = {"lolo": "LOLO", "iid_matched": "Matched IID",
                  "kfold": "5-fold CV", "holdout": "80:20 split"}
 # Ranking direction per metric. Coverage metrics are absent on purpose: closeness to the
@@ -178,8 +184,12 @@ def _score_line(y, pred) -> str:
 
 
 def _model_order(frame) -> list:
-    """Order models as the collector wrote them, not alphabetically as pivot/groupby would."""
-    return list(dict.fromkeys(frame.model))
+    """Canonical display order (MODEL_ORDER), never alphabetical as pivot/groupby
+    would give. Models outside MODEL_ORDER keep the order the collector wrote them
+    and follow the listed ones."""
+    seen = list(dict.fromkeys(frame.model))
+    listed = [m for m in MODEL_ORDER if m in seen]
+    return listed + [m for m in seen if m not in MODEL_ORDER]
 
 
 def _method_order(frame) -> list:

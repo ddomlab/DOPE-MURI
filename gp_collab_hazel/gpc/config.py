@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-MODELS = ["ligand_ohe", "selected_5", "selected_2", "pc_top", "pc_scores"]
+MODELS = ["ligand_ohe", "selected_2", "selected_5", "pc_top", "pc_scores"]
 METHODS = ["lolo", "iid_stratified_8", "kfold_stratified_5"]
 TARGET = "Product_Yield_PCT_Area_UV"
 GROUP = "ligand"

@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-MODELS = ["ligand_ohe", "selected_5", "selected_2", "pc_top", "pc_scores",
+MODELS = ["ligand_ohe", "selected_2", "selected_5", "pc_top", "pc_scores",
           "rxnpredict_full", "rxnpredict_full_ohe"]
 # Non-LOLO method names encode their own fold count and whether they stratify;
 # see gpc/splits.parse_method. Any kfold_<n> / *_stratified_<n> is valid.
