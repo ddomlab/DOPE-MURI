@@ -2,7 +2,7 @@
   "schema_version": 1,
   "paths": {
     "bundle": "inputs",
-    "runs": "runs/rxnpredict_v1"
+    "runs": "runs/rxnpredict_ard_v2"
   },
   "run": {
     "models": [
@@ -11,6 +11,9 @@
       "selected_5",
       "pc_top",
       "pc_scores",
+      "pc_scores_long"
+    ],
+    "models_disabled": [
       "rxnpredict_full",
       "rxnpredict_full_ohe"
     ],
@@ -22,18 +25,25 @@
     ],
     "seed": 42,
     "stratify": true,
-    "threads": 4
+    "threads": 4,
+    "model_overrides": {
+      "pc_scores_long": {
+        "n_epochs": 1600,
+        "restarts": 3,
+        "walltime": "02:00:00"
+      }
+    }
   },
   "gp": {
     "kernel": "RBF",
     "grouping": "all",
     "mixing_method": "product",
-    "ard": false,
+    "ard": true,
     "dtype": "float32",
     "noise": null,
     "noise_floor": 0.01,
     "outputscale": null,
-    "train_jitter": 0.1,
+    "train_jitter": 0.0001,
     "predict_jitter": 0.0001,
     "restarts": 1,
     "n_epochs": 400,

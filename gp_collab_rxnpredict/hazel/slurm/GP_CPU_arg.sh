@@ -9,12 +9,12 @@
 # cpus-per-task matches "threads" in configs/default.json -- change both together.
 
 DATE=$(date +%Y%m%d)
-run_tag="rxnpredict_v1"
+run_tag="rxnpredict_ard_v2"
 conda_env="/usr/local/usrapps/ddomlab/kagoble/gp_collab_hazel_py312"
 project_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 runs="runs/${run_tag}_cpu"
 
-output_root="/share/ddomlab/kagoble/working_space/gp_collab_rxnpredict/HPC_history/hpc_${DATE}"
+output_root="${project_root}/HPC_history/hpc_${DATE}"
 output_dir="${output_root}/${run_tag}"
 mkdir -p "$output_dir" || exit 1
 
@@ -48,8 +48,27 @@ if [[ -z "$n_tasks" || "$n_tasks" -eq 0 ]]; then
 fi
 echo "Submitting ${n_tasks} tasks to ${runs}"
 
+# Per-task walltime. run.model_overrides[<model>].walltime wins for that model; every
+# other task keeps the default above. Measured baseline: pc_scores__lolo took 158.9s
+# total on an A100 at 400 epochs / 1 restart / ard=false. pc_scores_long runs 1600
+# epochs x 3 restarts -- 12x the optimiser work -- with ARD over 788 lengthscales, so
+# it gets its own longer budget. Re-measure before trusting that estimate.
+default_walltime="${walltime}"
+declare -A model_walltime
+while IFS=$'	' read -r _m _w; do
+    [[ -n "$_m" ]] && model_walltime["$_m"]="$_w"
+done < <(cd "$project_root" && "$env_python" -c "
+import json
+cfg = json.load(open('configs/default.json'))
+for m, o in cfg.get('run', {}).get('model_overrides', {}).items():
+    if o.get('walltime'):
+        print(m + chr(9) + o['walltime'])
+")
+mapfile -t task_model < <(cd "$project_root" && "$env_python" -m gpc tasks | tail -n +2 | awk '{print $2}')
+
 job_ids=()
 for task_id in $(seq 0 $((n_tasks - 1))); do
+    walltime="${model_walltime[${task_model[$task_id]}]:-$default_walltime}"
     job_id=$(sbatch --parsable <<EOT
 #!/bin/bash
 #SBATCH --nodes=1

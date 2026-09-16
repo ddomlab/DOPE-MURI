@@ -94,7 +94,9 @@ def test_kernel_is_one_isotropic_rbf(tmp_path):
     from gpc.train import run_task
 
     cfg = load_config(ROOT / "configs/default.json")
-    cfg["gp"].update(n_epochs=2, use_cuda=False)
+    # Pin ard explicitly: this test states an invariant about ard=False, so it must not
+    # silently change meaning when the shipped config flips ard on.
+    cfg["gp"].update(n_epochs=2, use_cuda=False, ard=False)
     out = run_task(BUNDLE, tmp_path, "selected_2", "kfold_stratified_5", cfg)
 
     import json
@@ -107,3 +109,45 @@ def test_kernel_is_one_isotropic_rbf(tmp_path):
     assert len(predictions) == 3072
     assert predictions["y_pred"].notna().all()
     assert predictions["y_std"].notna().all()
+
+
+def test_ard_gives_one_lengthscale_per_feature(tmp_path):
+    """ard=True must give a per-column lengthscale, keyed fp_all[i], and the
+    per-model override must reach the fit."""
+    pytest.importorskip("torch")
+    pytest.importorskip("gpytorch")
+    import json
+    from gpc.train import run_task
+
+    cfg = load_config(ROOT / "configs/default.json")
+    cfg["gp"].update(n_epochs=2, use_cuda=False, ard=True)
+    out = run_task(BUNDLE, tmp_path, "selected_2", "kfold_stratified_5", cfg)
+
+    scores = json.loads((out / "scores.json").read_text())
+    per_fold = scores[str(cfg["run"]["seed"])]["test_lengthscale"]
+    for fold in per_fold:
+        keys = list(fold)
+        assert len(keys) > 1, "ard=True still produced a single lengthscale"
+        assert all(k.startswith("fp_all[") for k in keys)
+
+    meta = json.loads((out / "meta.json").read_text())
+    assert meta["config"]["gp"]["ard"] is True
+
+
+def test_model_override_reaches_the_fit(tmp_path):
+    """pc_scores_long must inherit pc_scores' features but its own GP budget."""
+    from gpc.train import effective_config
+    from gpc.features import feature_frame
+    from gpc.data import load_bundle
+
+    cfg = load_config(ROOT / "configs/default.json")
+    assert effective_config(cfg, "pc_scores_long")["gp"]["n_epochs"] == 1600
+    assert effective_config(cfg, "pc_scores_long")["gp"]["restarts"] == 3
+    assert effective_config(cfg, "pc_scores")["gp"]["n_epochs"] == cfg["gp"]["n_epochs"]
+    # walltime is scheduling metadata, never a GP parameter
+    assert "walltime" not in effective_config(cfg, "pc_scores_long")["gp"]
+
+    reactions, ligands, reference, prepared = load_bundle(BUNDLE)
+    a = feature_frame(reactions, ligands, "pc_scores", prepared, reference)
+    b = feature_frame(reactions, ligands, "pc_scores_long", prepared, reference)
+    assert a.columns.equals(b.columns) and a.equals(b)

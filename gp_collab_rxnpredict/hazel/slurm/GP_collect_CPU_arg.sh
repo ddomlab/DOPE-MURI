@@ -5,12 +5,12 @@
 # or to re-collect after retrying individual tasks.
 
 DATE=$(date +%Y%m%d)
-run_tag="rxnpredict_v1"
+run_tag="rxnpredict_ard_v2"
 conda_env="/usr/local/usrapps/ddomlab/kagoble/gp_collab_hazel_py312"
 project_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 runs="runs/${run_tag}"
 
-output_root="/share/ddomlab/kagoble/working_space/gp_collab_rxnpredict/HPC_history/hpc_${DATE}"
+output_root="${project_root}/HPC_history/hpc_${DATE}"
 output_dir="${output_root}/${run_tag}"
 mkdir -p "$output_dir" || exit 1
 

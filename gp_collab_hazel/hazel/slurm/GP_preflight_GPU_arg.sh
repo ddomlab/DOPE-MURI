@@ -8,7 +8,7 @@ DATE=$(date +%Y%m%d)
 conda_env="/usr/local/usrapps/ddomlab/kagoble/gp_collab_hazel_py312"
 project_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 
-output_root="/share/ddomlab/kagoble/working_space/gp_collab_hazel/HPC_history/hpc_${DATE}"
+output_root="${project_root}/HPC_history/hpc_${DATE}"
 output_dir="${output_root}/preflight"
 mkdir -p "$output_dir" || exit 1
 

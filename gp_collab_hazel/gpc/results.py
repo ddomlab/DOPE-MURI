@@ -123,12 +123,13 @@ def grouped_predictions(predictions, model, method="iid_matched"):
     return out
 
 
-MODEL_LABELS = {"pc_scores": "PC loading"}
+MODEL_LABELS = {"pc_scores": "PC loading", "pc_scores_long": "PC loading (long)"}
 # Canonical left-to-right order for every figure and table, so the hazel and
 # rxnpredict reviews read the same way regardless of the order a run's config
 # happened to list its models in. Anything unlisted keeps its collected order
 # and follows these.
 MODEL_ORDER = ["ligand_ohe", "selected_2", "selected_5", "pc_top", "pc_scores",
+               "pc_scores_long",
                "rxnpredict_full", "rxnpredict_full_ohe"]
 METHOD_LABELS = {"lolo": "LOLO", "iid_matched": "Matched IID",
                  "kfold": "5-fold CV", "holdout": "80:20 split"}
@@ -407,6 +408,390 @@ def plot_calibration(predictions, method="lolo"):
            ylabel="Observed fraction with PIT $\\leq q$",
            title=method_label(method), xlim=(0, 1), ylim=(0, 1))
     ax.legend(fontsize=8, frameon=False)
+    return fig
+
+
+def _task_dir(runs, model, method) -> Path:
+    """`<runs>/<model>__<method>`, the raw per-task output `prepare` reads from.
+
+    Also found one level down, so the same `RUNS` the notebook passes to `prepare`
+    works here when it holds run-tag folders rather than tasks.
+    """
+    runs = Path(runs)
+    direct = runs / f"{model}__{method}"
+    if direct.is_dir():
+        return direct
+    nested = [d / f"{model}__{method}" for d in sorted(runs.iterdir()) if d.is_dir()]
+    nested = [d for d in nested if d.is_dir()]
+    if len(nested) == 1:
+        return nested[0]
+    if len(nested) > 1:
+        raise ValueError(f"Several {model}__{method} tasks under {runs}: "
+                         f"{[d.parent.name for d in nested]}. Point runs at one of them.")
+    raise FileNotFoundError(f"No {model}__{method} task under {runs}")
+
+
+def _fold_encoder(bundle, model):
+    """(reactions, prepared, X, fit_fold) for whichever clone this is.
+
+    The rxnpredict bundle carries a published descriptor table that the hazel one
+    does not: there `load_bundle` returns it as a fifth value and `feature_frame` /
+    `_preprocessor` take it as a trailing argument. The signatures decide which, so
+    this file stays identical in both projects.
+
+    `fit_fold(train_idx)` returns the preprocessor fitted on those rows only -- the
+    same fit the run's own pipeline made for that fold, so its output column order is
+    the one the kernel indexed and its scaler never saw the held-out ligand.
+    """
+    import inspect
+    from gpc.data import load_bundle
+    from gpc.features import _preprocessor, feature_frame
+    parts = load_bundle(bundle)
+    reactions, ligands, reference, prepared = parts[:4]
+    rxn_features = parts[4] if len(parts) > 4 else None
+    rxn_columns = [c for c in rxn_features.columns if c != "row_id"] if rxn_features is not None else []
+    frame_takes_rxn = len(inspect.signature(feature_frame).parameters) > 5
+    prep_takes_rxn = len(inspect.signature(_preprocessor).parameters) > 4
+    X = (feature_frame(reactions, ligands, model, prepared, reference, rxn_features)
+         if frame_takes_rxn else feature_frame(reactions, ligands, model, prepared, reference))
+
+    def fit_fold(train_idx):
+        p = (_preprocessor(X, model, prepared, reference, rxn_columns) if prep_takes_rxn
+             else _preprocessor(X, model, prepared, reference))
+        return p.fit(X.iloc[train_idx])
+
+    return reactions, prepared, X, fit_fold
+
+
+def _task_folds(reactions, meta):
+    """The task's own folds, rebuilt from the seed and stratify flag it recorded."""
+    from gpc.splits import make_folds
+    return make_folds(reactions, meta["method"], meta["seed"], meta["stratify"])
+
+
+# gpc/train.py's `feature_groups` is the authority on which encoded columns each
+# kernel group covers, but importing it pulls in torch and this review path is
+# deliberately torch-free. The two rules below are copied from it; if the grouping
+# definitions there change, change these with them.
+def _ligand_columns(columns):
+    """Ligand block: the numeric descriptors plus the ligand identity one-hots."""
+    return [c for c in columns if c.startswith("num__") or c.startswith("cat__ligand_")]
+
+
+def _kernel_groups(grouping, prepared, columns):
+    """Encoded columns per kernel group, ordered as that group's lengthscales index them."""
+    if grouping == "all":
+        return {"fp_all": list(columns)}
+    if grouping == "ligand_conditions":
+        return {"fp_ligand": _ligand_columns(columns),
+                "fp_conditions": [c for c in columns if c.startswith("cat__")
+                                  and not c.startswith("cat__ligand_")]}
+    if grouping == "per_field":
+        groups = {"fp_ligand": _ligand_columns(columns)}
+        for field in prepared["data"]["common_categorical"]:
+            groups[f"fp_{field}"] = [c for c in columns if c.startswith(f"cat__{field}_")]
+        return groups
+    raise ValueError(f"Unknown grouping {grouping!r}")
+
+
+def _split_lengthscale_key(key):
+    """('fp_all', 7) for 'fp_all[7]'; ('fp_all', None) for one lengthscale per group."""
+    if key.endswith("]") and "[" in key:
+        head, _, index = key[:-1].partition("[")
+        if index.isdigit():
+            return head, int(index)
+    return key, None
+
+
+def ard_lengthscales(runs, bundle, model, method="lolo"):
+    """Per-feature ARD lengthscales for one task, one row per (fold, encoded feature).
+
+    Reads `<runs>/<model>__<method>/scores.json` and `meta.json` -- the raw GP_collab
+    output, not the exported review tables, which carry no lengthscales. `bundle` is
+    the prepared inputs directory.
+
+    `relevance` is 1 / lengthscale. An RBF varies fastest along its shortest
+    lengthscales, so a large relevance means the fit leans on that column. It ranks
+    columns within one fold of one model and nothing further: it is not a significance
+    test, and relevances from different models or kernels share no scale. Numeric
+    columns are standardized on the training fold while one-hots stay raw 0/1
+    indicators, so a one-hot's lengthscale is not on the same input scale as a
+    descriptor's either -- read the ranking within a family.
+
+    The kernel names lengthscales positionally (`fp_all[7]`), indexing the fitted
+    preprocessor's column order. Under LOLO that order differs between folds, because
+    each fold drops the held-out ligand's one-hot, so position 7 is a different
+    feature in a different fold. The preprocessor is therefore refit on each fold's
+    training rows and every index resolved to a name there. Aggregate by name.
+
+    Raises if the run was fitted isotropically (`ard: false`), which reports one
+    lengthscale for a whole group and holds no per-feature information.
+    """
+    directory = _task_dir(runs, model, method)
+    meta = read_json(directory / "meta.json")
+    scores = read_json(directory / "scores.json")
+    seed = str(meta["seed"])
+    if seed not in scores or "test_lengthscale" not in scores[seed]:
+        raise ValueError(f"{directory / 'scores.json'} has no test_lengthscale for seed "
+                         f"{seed}; the run must be cross-validated with return_ls=True.")
+    per_fold = scores[seed]["test_lengthscale"]
+    grouping = meta["config"]["gp"]["grouping"]
+    reactions, prepared, X, fit_fold = _fold_encoder(bundle, model)
+    folds, _ = _task_folds(reactions, meta)
+    if len(per_fold) != len(folds):
+        raise ValueError(f"{len(per_fold)} lengthscale records for {len(folds)} folds; "
+                         f"{directory} does not match the bundle it is being read against")
+
+    rows = []
+    for fold, ((train, _), reported) in enumerate(zip(folds, per_fold)):
+        names = list(fit_fold(train).get_feature_names_out())
+        groups = _kernel_groups(grouping, prepared, names)
+        ligand = set(_ligand_columns(names))
+        isotropic = [k for k, cols in groups.items() if k in reported and len(cols) > 1]
+        if isotropic:
+            raise ValueError(
+                f"{directory / 'scores.json'} reports a single lengthscale for "
+                + ", ".join(f"{k} ({len(groups[k])} columns)" for k in isotropic)
+                + f", so this run was fitted isotropically -- its meta.json records "
+                f"gp.ard = {meta['config']['gp']['ard']}. Per-feature relevance needs one "
+                f"lengthscale per column: set \"ard\": true under \"gp\" in the run config, "
+                f"re-run {model}/{method}, and point ard_lengthscales at the new runs "
+                f"directory.")
+        for key, value in reported.items():
+            group, index = _split_lengthscale_key(key)
+            if group not in groups:
+                raise ValueError(f"Fold {fold} reports lengthscale {key!r}, which is not a "
+                                 f"group of grouping {grouping!r}")
+            if value is None:
+                raise ValueError(f"Kernel {meta['config']['gp']['kernel']!r} reports no "
+                                 f"lengthscale for {key!r}; relevance is undefined for it")
+            if value <= 0:
+                raise ValueError(f"Fold {fold} reports a non-positive lengthscale for {key!r}")
+            feature = groups[group][0] if index is None else groups[group][index]
+            rows.append({"fold": fold, "group": group, "feature": feature,
+                         "lengthscale": float(value), "relevance": 1.0 / float(value),
+                         "family": "ligand" if feature in ligand else "condition"})
+    return pd.DataFrame(rows)
+
+
+def rank_features(runs, bundle, model, method="lolo", ligand_only=False, top=None):
+    """`ard_lengthscales` aggregated across folds by feature NAME, most relevant first.
+
+    The centre is the median relevance over the folds a feature appears in and the
+    spread is that feature's fold quartiles; a mean and a standard deviation are easy
+    to drag around on a ratio scale with this few folds. Long quartile spans mean the
+    folds disagree and the ranking there is soft.
+
+    `folds` is how many folds the feature existed in, out of `n_folds`. Under LOLO a
+    ligand one-hot is absent from its own fold, so it is scored on `n_folds - 1` and
+    its median is not measured over the same folds as the rest -- that is reported
+    rather than smoothed over. `group` is the kernel group the lengthscale came from;
+    with more than one group their relevances come from different kernels and are not
+    directly comparable.
+
+    `ligand_only=True` keeps the ligand block (numeric descriptors and ligand
+    one-hots); `top` truncates the sorted table.
+    """
+    frame = ard_lengthscales(runs, bundle, model, method)
+    n_folds = int(frame.fold.nunique())
+    if ligand_only:
+        frame = frame[frame.family == "ligand"]
+        if frame.empty:
+            raise ValueError(f"{model} encodes no ligand-block columns to rank")
+    table = (frame.groupby(["feature", "family", "group"], sort=False)
+             .agg(median_relevance=("relevance", "median"),
+                  relevance_q1=("relevance", lambda s: s.quantile(0.25)),
+                  relevance_q3=("relevance", lambda s: s.quantile(0.75)),
+                  median_lengthscale=("lengthscale", "median"),
+                  folds=("relevance", "count"))
+             .reset_index())
+    table["n_folds"] = n_folds
+    table = table.sort_values("median_relevance", ascending=False, kind="stable")
+    if top:
+        table = table.head(int(top))
+    return table.reset_index(drop=True)
+
+
+def plot_feature_importance(runs, bundle, model, method="lolo", ligand_only=False, top=20):
+    """Median relevance per encoded feature, most relevant at the top, coloured by family.
+
+    Whiskers span the fold quartiles, so a long whisker means the folds disagree about
+    that feature. A feature that is missing from some folds -- a ligand one-hot under
+    LOLO -- says so in its label, because its median is not measured over the same
+    folds as its neighbours'.
+    """
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
+    table = rank_features(runs, bundle, model, method, ligand_only)
+    total = len(table)
+    if top:
+        table = table.head(int(top))
+    colours = {"ligand": "tab:blue", "condition": "tab:orange"}
+    y = np.arange(len(table))[::-1]
+    error = np.vstack([(table.median_relevance - table.relevance_q1).to_numpy(),
+                       (table.relevance_q3 - table.median_relevance).to_numpy()])
+    fig, ax = plt.subplots(figsize=(7.5, max(2.5, 0.3 * len(table) + 1.6)),
+                           constrained_layout=True)
+    ax.barh(y, table.median_relevance.to_numpy(), xerr=error, height=0.75,
+            color=[colours.get(f, "tab:gray") for f in table.family],
+            error_kw={"ecolor": "0.35", "elinewidth": 1, "capsize": 2})
+    ax.set_yticks(y)
+    ax.set_yticklabels([name if n == nf else f"{name}  ({n}/{nf} folds)"
+                        for name, n, nf in zip(table.feature, table.folds, table.n_folds)],
+                       fontsize=8)
+    ax.set(xlabel="Median relevance across folds  (1 / lengthscale)")
+    ax.legend(handles=[Patch(color=colours[f], label=f)
+                       for f in ("ligand", "condition") if (table.family == f).any()],
+              fontsize=8, frameon=False)
+    fig.suptitle(_heading(model, method))
+    shown = f"{len(table)} of {total} encoded columns" if len(table) < total else \
+            f"all {total} encoded columns"
+    ax.set_title(f"{shown}, {int(table.n_folds.iloc[0])} folds"
+                 + (" | ligand block only" if ligand_only else ""),
+                 fontsize=9, color="0.3")
+    return fig
+
+
+def ligand_distances(runs, bundle, model, method="lolo"):
+    """How far each held-out ligand sits from the training ligands, one row per fold.
+
+    One vector per ligand, not per reaction. The fold's own preprocessor standardizes
+    the numeric ligand descriptors -- fitted on that fold's training rows only, so the
+    held-out ligand contributes nothing to the scaler and the distance leaks nothing
+    -- and each ligand's rows are averaged to one centroid. Distances are Euclidean in
+    that standardized space. For the descriptor models the numeric block is constant
+    within a ligand, so the mean is that ligand's own vector rather than an
+    approximation; it is written as a mean so a model whose numeric block varies by
+    row still reduces to one vector per ligand.
+
+    Reaction-condition one-hots are excluded: every ligand is run over the same
+    conditions, so including them would measure the design grid instead of the
+    chemistry. Ligand one-hots are excluded too, for the opposite reason -- they place
+    every ligand exactly the same distance apart.
+
+    `centroid_distance` is to the mean of the training ligands' vectors, one weight
+    per ligand rather than per row. `nearest_distance` is to the closest single
+    training ligand, usually the better read on extrapolation: a ligand can sit near
+    the training mean while resembling nothing actually trained on.
+
+    Raises for a model whose ligand block is purely one-hot (`ligand_ohe`), which has
+    no descriptor geometry to measure, and for a method whose folds do not each hold
+    out one ligand.
+    """
+    directory = _task_dir(runs, model, method)
+    meta = read_json(directory / "meta.json")
+    reactions, prepared, X, fit_fold = _fold_encoder(bundle, model)
+    folds, references = _task_folds(reactions, meta)
+    if not all(references):
+        raise ValueError(f"{meta['method']} folds do not each hold out one ligand, so there "
+                         f"is no held-out ligand to measure a distance for; use method='lolo'")
+    if len(folds) < 2:
+        raise ValueError("Fewer than two ligands: no training ligand to measure against")
+
+    rows = []
+    for fold, (train, _) in enumerate(folds):
+        preprocessor = fit_fold(train)
+        names = list(preprocessor.get_feature_names_out())
+        numeric = [i for i, name in enumerate(names) if name.startswith("num__")]
+        if not numeric:
+            raise ValueError(
+                f"{model} encodes no numeric ligand descriptors -- its ligand block is "
+                f"one-hot, which places every ligand the same distance apart, so this "
+                f"distance would be noise. Use a descriptor model: selected_2, "
+                f"selected_5, pc_top or pc_scores.")
+        encoded = np.asarray(preprocessor.transform(X), dtype=float)[:, numeric]
+        # Under LOLO a ligand's rows are exactly the test rows of its own fold, so the
+        # folds double as the row index of each ligand and no group column is needed.
+        centroid = {ref: encoded[test].mean(axis=0) for ref, (_, test) in zip(references, folds)}
+        held_out = references[fold]
+        training = {ref: vector for ref, vector in centroid.items() if ref != held_out}
+        distance = {ref: float(np.linalg.norm(centroid[held_out] - vector))
+                    for ref, vector in training.items()}
+        nearest = min(distance, key=distance.get)
+        rows.append({"fold": fold, "reference_group": held_out,
+                     "centroid_distance": float(np.linalg.norm(
+                         centroid[held_out] - np.mean(list(training.values()), axis=0))),
+                     "nearest_distance": distance[nearest], "nearest_ligand": nearest,
+                     "n_descriptors": len(numeric)})
+    return pd.DataFrame(rows)
+
+
+def _spearman(x, y):
+    """(rho, p) for the rank correlation, or (None, None) when it cannot be formed."""
+    x, y = np.asarray(x, dtype=float), np.asarray(y, dtype=float)
+    if len(x) < 3 or np.std(x) == 0 or np.std(y) == 0:
+        return (None, None)
+    result = spearmanr(x, y)
+    return (_finite_or_none(result.statistic), _finite_or_none(result.pvalue))
+
+
+def distance_vs_performance(runs, bundle, model, method="lolo", metric="rmse"):
+    """`ligand_distances` joined to each fold's collected metric, one row per ligand.
+
+    The metric is taken from the collected `metrics_by_split` table, so it is the same
+    number every other table here reports; `prepare` builds that export if it is
+    missing.
+
+    The two Spearman correlations -- each distance definition against the metric --
+    are returned in `frame.attrs["spearman"]` as `{"centroid": (rho, p), "nearest":
+    (rho, p)}`. They are deliberately NOT columns: they describe the whole table, and
+    repeating a constant down the rows reads as a per-fold number. `.attrs` does not
+    survive every pandas operation, so read them off the frame this call returns.
+
+    There is one point per ligand -- eight here, four for the four-ligand set -- so a
+    correlation is suggestive of extrapolation behaviour and nothing more. Read its
+    sign against the metric: for an error metric (rmse, mae, predictive_nll) positive
+    rho is the expected "farther is worse"; for r2 or kendall_tau it is negative rho.
+    """
+    frame = ligand_distances(runs, bundle, model, method)
+    tables, _ = load_results(prepare(runs, bundle))
+    metrics = tables["metrics_by_split"]
+    if metric not in metrics.columns:
+        raise ValueError(f"No {metric!r} column in metrics_by_split; "
+                         f"choose from {sorted(set(metrics.columns) & set(RANK_DIRECTION))}")
+    part = metrics.loc[(metrics.model == model) & (metrics.method == method),
+                       ["fold", "reference_group", metric]]
+    if part.empty:
+        raise ValueError(f"No collected {model}/{method} metrics to join; "
+                         f"rebuild with prepare(runs, bundle, refresh=True)")
+    merged = frame.merge(part, on=["fold", "reference_group"], how="left", validate="one_to_one")
+    merged[metric] = pd.to_numeric(merged[metric], errors="coerce")
+    if merged[metric].isna().any():
+        raise ValueError(f"No {metric!r} for folds "
+                         f"{merged.loc[merged[metric].isna(), 'reference_group'].tolist()}")
+    merged.attrs["spearman"] = {
+        "centroid": _spearman(merged.centroid_distance, merged[metric]),
+        "nearest": _spearman(merged.nearest_distance, merged[metric])}
+    return merged
+
+
+def plot_distance_vs_performance(runs, bundle, model, method="lolo", metric="rmse"):
+    """Each fold's metric against how far its held-out ligand sat from the training set.
+
+    Two panels, one per distance definition, sharing the metric axis; every point is
+    one held-out ligand and is labelled with it. Each panel's subtitle carries its
+    Spearman rho, and the figure subtitle the number of folds behind them -- with one
+    point per ligand the sign is a hint about extrapolation, not evidence.
+    """
+    import matplotlib.pyplot as plt
+    frame = distance_vs_performance(runs, bundle, model, method, metric)
+    correlation = frame.attrs["spearman"]
+    panels = [("centroid_distance", "centroid", "to the training-ligand mean"),
+              ("nearest_distance", "nearest", "to the nearest training ligand")]
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.5), sharey=True, constrained_layout=True)
+    for ax, (column, key, label) in zip(axes, panels):
+        ax.scatter(frame[column], frame[metric], s=36, color="tab:blue", edgecolors="none")
+        for _, row in frame.iterrows():
+            ax.annotate(row.reference_group, (row[column], row[metric]),
+                        xytext=(4, 4), textcoords="offset points", fontsize=8, color="0.3")
+        rho, p = correlation[key]
+        ax.set_xlabel(f"Standardized distance {label}")
+        ax.set_title("Spearman $\\rho$ = " + ("n/a" if rho is None else f"{rho:+.2f}  (p = {p:.2f})"),
+                     fontsize=9, color="0.3")
+    better = RANK_DIRECTION.get(metric)
+    axes[0].set_ylabel(f"{metric} on the held-out ligand"
+                       + (f" ({better} is better)" if better else ""))
+    fig.suptitle(f"{_heading(model, method)}  |  {len(frame)} folds, correlation suggestive only")
     return fig
 
 

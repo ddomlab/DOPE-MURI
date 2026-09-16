@@ -114,8 +114,20 @@ def pc_scores_form(cfg: dict) -> str:
     return cfg["features"].get("pc_scores_form", "component_scores")
 
 
+# A long-budget variant must differ in GP hyperparameters ONLY, never in features --
+# that is what keeps it comparable to its short-budget twin. Resolving the alias here
+# means the pc_scores branches below (and _expands_loadings) need no duplication.
+MODEL_FEATURE_ALIAS = {"pc_scores_long": "pc_scores"}
+
+
+def feature_alias(model: str) -> str:
+    """The model whose FEATURES `model` uses; identity for everything unaliased."""
+    return MODEL_FEATURE_ALIAS.get(model, model)
+
+
 def model_columns(model: str, cfg: dict, reference: ReferencePCA,
                   rxn_columns=()) -> tuple[list, list]:
+    model = feature_alias(model)
     categorical = list(cfg["data"]["common_categorical"])
     group = cfg["data"].get("group", "ligand")
     # The two rxnpredict sets carry that project's published DFT descriptors in
@@ -161,7 +173,7 @@ def feature_frame(reactions: pd.DataFrame, ligands: pd.DataFrame, model: str,
 
 
 def _expands_loadings(model: str, cfg: dict) -> bool:
-    return model == "pc_scores" and pc_scores_form(cfg) == "loading_weighted"
+    return feature_alias(model) == "pc_scores" and pc_scores_form(cfg) == "loading_weighted"
 
 
 def _numeric_pipeline(model: str, cfg: dict, reference: ReferencePCA) -> Pipeline:

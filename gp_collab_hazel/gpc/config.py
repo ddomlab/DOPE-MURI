@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-MODELS = ["ligand_ohe", "selected_2", "selected_5", "pc_top", "pc_scores"]
+MODELS = ["ligand_ohe", "selected_2", "selected_5", "pc_top", "pc_scores", "pc_scores_long"]
 METHODS = ["lolo", "iid_stratified_8", "kfold_stratified_5"]
 TARGET = "Product_Yield_PCT_Area_UV"
 GROUP = "ligand"
@@ -57,4 +57,16 @@ def load_config(path: str | Path) -> dict:
         raise ValueError(f"Unknown kernel {cfg['gp']['kernel']!r}")
     if cfg["gp"]["grouping"] not in ("all", "ligand_conditions", "per_field"):
         raise ValueError(f"Unknown grouping {cfg['gp']['grouping']!r}")
+    # Per-model GP overrides. A silently ignored override would burn hours of cluster
+    # time and produce a run indistinguishable from the default one, so typos are a
+    # hard error. "walltime" is the one non-gp key allowed: it is scheduling, not model.
+    overrides = cfg["run"].get("model_overrides", {})
+    unknown = set(overrides) - set(cfg["run"]["models"])
+    if unknown:
+        raise ValueError(f"model_overrides names models that are not in run.models: {sorted(unknown)}")
+    for model, block in overrides.items():
+        bad = set(block) - set(cfg["gp"]) - {"walltime"}
+        if bad:
+            raise ValueError(f"model_overrides[{model!r}] sets unknown keys {sorted(bad)}; "
+                             f"only gp keys and 'walltime' are allowed")
     return cfg

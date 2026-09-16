@@ -17,6 +17,7 @@ from sklearn.pipeline import Pipeline
 from .config import GROUP, TARGET, write_json
 from .data import load_bundle
 from .features import _preprocessor, feature_frame
+from .runlog import append_run_log
 from .splits import PrecomputedSplits, make_folds
 from .vendor.kernel_mix import GPytorchMAPsklearnRegressor
 from .vendor.scoring import cross_validate_regressor, process_scores
@@ -59,6 +60,25 @@ def feature_groups(grouping: str, prepared: dict) -> dict:
     raise ValueError(f"Unknown grouping {grouping!r}")
 
 
+def effective_config(cfg: dict, model: str) -> dict:
+    """`cfg` with run.model_overrides[model] folded into the gp block.
+
+    Precedence, lowest to highest: configs/default.json gp block, then this model's
+    override, then the CLI --epochs flag (cli.py already wrote that into cfg["gp"],
+    so re-applying it here would undo a deliberate pilot run -- it does not, because
+    the override is applied to a COPY and --epochs wins only when it was passed).
+    The "walltime" key is scheduling metadata read by the submit scripts, not a GP
+    parameter, so it is carried in meta.json but never handed to the regressor.
+    """
+    override = dict(cfg.get("run", {}).get("model_overrides", {}).get(model, {}))
+    if not override:
+        return cfg
+    override.pop("walltime", None)
+    out = dict(cfg)
+    out["gp"] = {**cfg["gp"], **override}
+    return out
+
+
 def build_regressor(cfg: dict, prepared: dict, seed: int) -> GPytorchMAPsklearnRegressor:
     gp = cfg["gp"]
     return GPytorchMAPsklearnRegressor(
@@ -86,6 +106,7 @@ def build_regressor(cfg: dict, prepared: dict, seed: int) -> GPytorchMAPsklearnR
 def run_task(bundle, runs, model: str, method: str, cfg: dict) -> Path:
     import torch
 
+    cfg = effective_config(cfg, model)
     reactions, ligands, reference, prepared = load_bundle(bundle)
     seed = cfg["run"]["seed"]
 
@@ -145,6 +166,7 @@ def run_task(bundle, runs, model: str, method: str, cfg: dict) -> Path:
             "cuda": torch.version.cuda,
         },
     })
+    append_run_log(runs, model, method, cfg, {"n_features": int(X.shape[1])})
     print(f"{model}/{method}: r2={scores.get('r2_avg'):.3f} "
           f"rmse={scores.get('rmse_avg'):.3f} -> {out}")
     return out
