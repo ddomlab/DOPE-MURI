@@ -3,11 +3,11 @@
   "dataset": "rxnpredict_ahneman_2018",
   "n_rows": 3955,
   "n_models": 7,
-  "n_methods": 3,
-  "config_hash": "2f77c85967846c47c09e42b747b68e12f83ec1278a1099780a00cf549a1aa992",
+  "n_methods": 4,
+  "config_hash": "5f53e4de07607fc18dde58e18e4d9739b30677864d217c2fe99d445dd860556b",
   "files": {
     "audit.json": "408f47690e7db538116c895e19af52d098389f1a8c97a5ed8870f176da99cae5",
-    "config.json": "8da679e215033dfb44185eef5d442a31adf40deddd74b150c3c075fc097b79b8",
+    "config.json": "81242d75667dabaa15c66b853ee3e465552e329dba2c0167a33faf5819dcdb3f",
     "ligand_features.csv": "de4efe389bbdaec969a3e2230f453b4278402380a578319bfb25470ef4e46ec4",
     "ligand_mapping.csv": "bb03475e3e121e8f2d56f21138783ffc252081495f4ac070be703c336ea0711b",
     "model_features.csv": "75ba99e596c13900eb990e960ad39dc0ce48138c1bc0717f6f4dd4990d54b2b1",
@@ -18,5 +18,5 @@
     "reactions.csv": "cbed1d0aeaba7762be872a5ceb500c10d33791a28e522ce5cc67392eca701490",
     "rxnpredict_features.csv": "3d89a2503effb193003989ae50458b431305b0f27d7776a09104ca58e25634a9"
   },
-  "bundle_id": "84d809647c2249190a7a447938bbd90fab3acc52bd4f5fabaed8ee1b2d5fd481"
+  "bundle_id": "9d0da0899b1349af1c2c56eff8dfb181f597e15d164ee26dfca4946a05669e76"
 }

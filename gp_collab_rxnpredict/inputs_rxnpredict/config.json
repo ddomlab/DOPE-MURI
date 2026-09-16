@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "dataset": "rxnpredict_ahneman_2018",
+  "source": "https://github.com/doylelab/rxnpredict",
+  "data": {
+    "target": "yield",
+    "group": "ligand",
+    "common_categorical": [
+      "aryl_halide",
+      "base",
+      "additive"
+    ],
+    "ligand_mapping": {
+      "XPhos": 1,
+      "t-BuXPhos": 90,
+      "t-BuBrettPhos": 89,
+      "AdBrettPhos": 347
+    },
+    "expected_rows": 3955,
+    "expected_ligands": 4,
+    "sphere_radius_angstrom": 3.5,
+    "hartree_to_eV": 27.211386245981
+  },
+  "features": {
+    "models": [
+      "ligand_ohe",
+      "selected_2",
+      "selected_5",
+      "pc_top",
+      "pc_scores",
+      "rxnpredict_full",
+      "rxnpredict_full_ohe"
+    ],
+    "pca_reference": "full_original_kraken",
+    "pca_components": 4,
+    "top_per_pc": 3,
+    "pc_scores_form": "loading_weighted",
+    "ohe_policy": "train_ignore_unknown"
+  },
+  "evaluation": {
+    "methods": [
+      "lolo",
+      "iid_stratified_4",
+      "kfold_stratified_5",
+      "kfold_5"
+    ],
+    "seed": 42,
+    "stratify_on": "ligand"
+  }
+}
