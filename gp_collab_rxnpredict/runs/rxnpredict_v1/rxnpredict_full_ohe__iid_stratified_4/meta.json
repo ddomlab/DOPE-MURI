@@ -1,0 +1,60 @@
+{
+  "model": "rxnpredict_full_ohe",
+  "method": "iid_stratified_4",
+  "seed": 42,
+  "stratify": true,
+  "n_folds": 4,
+  "n_rows": 3955,
+  "n_features": 123,
+  "config": {
+    "schema_version": 1,
+    "paths": {
+      "bundle": "inputs",
+      "runs": "runs/rxnpredict_v1"
+    },
+    "run": {
+      "models": [
+        "ligand_ohe",
+        "selected_2",
+        "selected_5",
+        "pc_top",
+        "pc_scores",
+        "rxnpredict_full",
+        "rxnpredict_full_ohe"
+      ],
+      "methods": [
+        "lolo",
+        "iid_stratified_4",
+        "kfold_stratified_5",
+        "kfold_5"
+      ],
+      "seed": 42,
+      "stratify": true,
+      "threads": 4
+    },
+    "gp": {
+      "kernel": "RBF",
+      "grouping": "all",
+      "mixing_method": "product",
+      "ard": false,
+      "dtype": "float32",
+      "noise": null,
+      "noise_floor": 0.01,
+      "outputscale": null,
+      "train_jitter": 0.1,
+      "predict_jitter": 0.0001,
+      "restarts": 1,
+      "n_epochs": 400,
+      "learning_rate": 0.01,
+      "prior": true,
+      "normalize_y": true,
+      "use_cuda": true
+    }
+  },
+  "device": "cuda",
+  "versions": {
+    "python": "3.12.14",
+    "torch": "2.8.0+cu126",
+    "cuda": "12.6"
+  }
+}
