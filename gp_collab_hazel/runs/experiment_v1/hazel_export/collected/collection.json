@@ -1,0 +1,16 @@
+{
+  "run_id": "3d09d413686f8319bb6104f932abe490bf713d891d5851d45b44ea45778a3fbe",
+  "bundle_id": "70a3badb87b9dedc54447384977b0beefbba8876ad7535112790f49be4d8ee1c",
+  "complete": true,
+  "expected_tasks": 105,
+  "completed_tasks": 105,
+  "incomplete_task_ids": [],
+  "iid_pooling": "Every method is a non-repeating partition, pooled like LOLO.",
+  "produced_by": "gpc export-hazel",
+  "output_hashes": {
+    "predictions.csv": "ff51e462a027978e3d8d254e1a753d8f5e9ba899867f1644648f289d787a6dc7",
+    "metrics_by_split.csv": "b219e647aceec1328b2ddee70b2dde767f28c8cafc512f7d8a43d9db66782cac",
+    "summary.csv": "4f6beb2ec2f27484d66691557fc99a4b50db57711d03ba35e5f0fd849839dae0",
+    "task_status.csv": "b67f7afdbcdf9d192d78cd6b13b17e6ced4e8c9a80e2cd21ccda4a2339329631"
+  }
+}
