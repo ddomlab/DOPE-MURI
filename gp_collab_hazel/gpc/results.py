@@ -156,8 +156,14 @@ def _select(predictions, model, method, reference_group=None, split_id=None):
     return p
 
 
-def _heading(model, method, reference_group=None) -> str:
-    parts = [model_label(model), method_label(method)]
+def _heading(model, method, reference_group=None, title=None) -> str:
+    """`title`, if given, is a str.format template with `model`, `method`,
+    `reference_group` fields (labelled/raw as passed in) -- e.g.
+    "{model} on {method}". None keeps the default "Model | method[| ligand]"."""
+    model_l, method_l = model_label(model), method_label(method)
+    if title:
+        return title.format(model=model_l, method=method_l, reference_group=reference_group or "")
+    parts = [model_l, method_l]
     if reference_group:
         parts.append(str(reference_group))
     return " | ".join(parts)
@@ -258,8 +264,11 @@ def lolo_report(predictions, metrics_by_split, models=None):
     return pd.DataFrame(rows)
 
 
-def plot_parity(predictions, model, method="lolo", reference_group=None, split_id=None):
-    """Observed against predicted yield. Points are not separated by ligand."""
+def plot_parity(predictions, model, method="lolo", reference_group=None, split_id=None, title=None):
+    """Observed against predicted yield. Points are not separated by ligand.
+
+    `title`, if given, overrides the default "Model | method" heading -- see `_heading`.
+    """
     import matplotlib.pyplot as plt
     p = _select(predictions, model, method, reference_group, split_id)
     fig, ax = plt.subplots(figsize=(5, 4.5), constrained_layout=True)
@@ -267,13 +276,13 @@ def plot_parity(predictions, model, method="lolo", reference_group=None, split_i
     lo, hi = min(0, p.y_pred.min()), max(100, p.y_pred.max())
     ax.plot([lo, hi], [lo, hi], color="black", linestyle="--", linewidth=1)
     ax.set(xlabel="Observed yield (%)", ylabel="Predicted yield (%)")
-    fig.suptitle(_heading(model, method, reference_group))
+    fig.suptitle(_heading(model, method, reference_group, title))
     ax.set_title(_score_line(p.y_true, p.y_pred), fontsize=9, color="0.3")
     return fig
 
 
 def plot_mean_trend(predictions, model, method="lolo", reference_group=None,
-                    bins=10, band="empirical"):
+                    bins=10, band="empirical", title=None):
     """Mean predicted yield across observed-yield bins, shaded by one standard deviation.
 
     `band="empirical"` shades the spread of the predictions inside each bin.
@@ -305,7 +314,7 @@ def plot_mean_trend(predictions, model, method="lolo", reference_group=None,
     ax.plot(centre, mean, color="tab:blue", marker="o", markersize=4, linewidth=1.8,
             label="Mean")
     ax.set(xlabel="Observed yield (%)", ylabel="Predicted yield (%)")
-    fig.suptitle(_heading(model, method, reference_group))
+    fig.suptitle(_heading(model, method, reference_group, title))
     ax.set_title(_score_line(p.y_true, p.y_pred), fontsize=9, color="0.3")
     ax.legend(fontsize=8, frameon=False)
     return fig
@@ -391,7 +400,10 @@ def plot_calibration(predictions, method="lolo"):
     return fig
 
 
-def review_controls(tables):
+def review_controls(tables, title=None):
+    """`title`, if given, overrides the parity plot's default "Model | method"
+    heading -- a str.format template with `model`, `method`, `reference_group`
+    fields, e.g. "{model} on {method}". See `_heading`."""
     # Local imports (were module level in hazel_gp/notebook.py) so this file
     # imports fine outside a notebook, and without ipywidgets installed.
     import ipywidgets as w
@@ -412,7 +424,7 @@ def review_controls(tables):
         with out:
             clear_output(wait=True)
             try:
-                fig = plot_parity(pred, model.value, method.value, group.value or None)
+                fig = plot_parity(pred, model.value, method.value, group.value or None, title=title)
                 display(fig)
                 plt.close(fig)
             except ValueError as exc:
