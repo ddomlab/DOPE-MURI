@@ -1,0 +1,16 @@
+{
+  "run_id": "cernak_suzuki_informer_2023",
+  "bundle_id": "https://github.com/cernaklab/medchem-reaction-miniaturization",
+  "complete": true,
+  "expected_tasks": 75,
+  "completed_tasks": 75,
+  "incomplete_task_ids": [],
+  "iid_pooling": "Every method is a non-repeating partition, pooled like LOLO.",
+  "produced_by": "gpc export-hazel",
+  "output_hashes": {
+    "predictions.csv": "a4fc5ebf76cb28f7a8d3f8f93542cacef8de70b1e67f6c814ce4b53507c7754c",
+    "metrics_by_split.csv": "e8ed8d912ea2a39ee8526c0954d6367d9d8ea58bee0625a1715566bbbe23eec5",
+    "summary.csv": "c7498351cfac710e26c9701cefce9168f9c83ce05ce3acee2f09f3cde4cc6e18",
+    "task_status.csv": "3c4e34fb3518078aa4b4e31b08591455b8e05815a6ffdae95daab94d8425d61d"
+  }
+}
