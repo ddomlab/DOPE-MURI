@@ -27,17 +27,15 @@ sbatch <<EOT
 #SBATCH --output="${output_dir}/preflight_GPU.out"
 #SBATCH --error="${output_dir}/preflight_GPU.err"
 
-source ~/.bashrc
 module load cuda/12.1
 module load gcc/9.3.0
-conda activate ${conda_env}
 
 nvidia-smi
 
 cd ${project_root}
-python -m gpc check-env
-python -m gpc tasks
-python -m gpc splits
+"${conda_env}/bin/python" -m gpc check-env
+"${conda_env}/bin/python" -m gpc tasks
+"${conda_env}/bin/python" -m gpc splits
 EOT
 
 echo "Preflight submitted. Logs: ${output_dir}"

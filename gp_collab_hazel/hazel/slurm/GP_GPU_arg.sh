@@ -82,13 +82,11 @@ for task_id in $(seq 0 $((n_tasks - 1))); do
 #SBATCH --output="${output_dir}/task_${task_id}_GPU.out"
 #SBATCH --error="${output_dir}/task_${task_id}_GPU.err"
 
-source ~/.bashrc
 module load cuda/12.1
 module load gcc/9.3.0
-conda activate ${conda_env}
 
 cd ${project_root}
-python -m gpc --runs ${runs} train --task-id ${task_id} ${epochs}
+"${conda_env}/bin/python" -m gpc --runs ${runs} train --task-id ${task_id} ${epochs}
 EOT
 )
     job_ids+=("$job_id")
@@ -110,11 +108,9 @@ if [[ "$submit_collection" == "1" ]]; then
 #SBATCH --output="${output_dir}/collect.out"
 #SBATCH --error="${output_dir}/collect.err"
 
-source ~/.bashrc
-conda activate ${conda_env}
 
 cd ${project_root}
-python -m gpc --runs ${runs} collect
+"${conda_env}/bin/python" -m gpc --runs ${runs} collect
 EOT
     echo "Collection chained behind the training jobs."
 fi

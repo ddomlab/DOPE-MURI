@@ -26,11 +26,9 @@ sbatch <<EOT
 #SBATCH --output="${output_dir}/collect_${run_tag}.out"
 #SBATCH --error="${output_dir}/collect_${run_tag}.err"
 
-source ~/.bashrc
-conda activate ${conda_env}
 
 cd ${project_root}
-python -m gpc --runs ${runs} collect
+"${conda_env}/bin/python" -m gpc --runs ${runs} collect
 EOT
 
 echo "Collection submitted. Logs: ${output_dir}"
