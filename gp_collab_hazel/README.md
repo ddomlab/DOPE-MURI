@@ -21,8 +21,9 @@ Production is **105 GP fits** — 5 feature sections × 21 folds — submitted a
 
 ## Feature sections
 
-Unchanged from DOPE-MURI. Encoded input counts (LOLO / in-distribution) are
-asserted against that project's published table in `tests/test_smoke.py`:
+Encoded input counts (LOLO / in-distribution) are asserted in
+`tests/test_smoke.py`. Four of the five sections are unchanged from DOPE-MURI;
+`pc_scores` is not -- see the note below the table.
 
 | Section | Ligand inputs | Encoded inputs |
 | --- | --- | ---: |
@@ -30,7 +31,16 @@ asserted against that project's published table in `tests/test_smoke.py`:
 | `selected_5` | Boltzmann-average, minimum and range of buried volume; dipole; HOMO–LUMO gap | 33 / 33 |
 | `selected_2` | Boltzmann-average and minimum buried volume | 30 / 30 |
 | `pc_top` | top 3 original descriptors from each of PC1–PC4, deduplicated | 40 / 40 |
-| `pc_scores` | each of the 190 reference descriptors × its loading in each of PC1–PC4 | 788 / 788 |
+| `pc_scores` | the four reference-PCA component scores PC1–PC4 | 32 / 32 |
+
+`pc_scores` is a genuine dimensionality reduction: 190 Kraken descriptors in,
+four principal-component scores out. It previously held each descriptor × its
+loading in each component -- 760 numeric columns, no reduction at all. Under
+`ard: true` the GP reabsorbs those loading constants, leaving 760
+unidentifiable lengthscales over at most seven real dimensions, so that form is
+retired. `features.pc_scores_form` in `inputs/config.json` selects the form:
+`component_scores` is the current default, `loading_weighted` reproduces the old
+one. **Runs recorded before this change carry the old 760-column `pc_scores`.**
 
 All sections keep the same four categorical fields (28 one-hot columns).
 Scaling, one-hot fitting and target standardisation happen inside each training
@@ -65,8 +75,8 @@ identical to a single RBF with lengthscales shared within each group:
 ∏ᵢ exp(−‖xᵢ−x'ᵢ‖² / 2ℓᵢ²) = exp(−Σᵢ ‖xᵢ−x'ᵢ‖² / 2ℓᵢ²)
 ```
 
-So `grouping` only sets **how many lengthscales the one kernel has**, and
-`pc_scores` costs one kernel evaluation, not 760:
+So `grouping` only sets **how many lengthscales the one kernel has**, never how
+many kernels are evaluated -- a wide block still costs one kernel evaluation:
 
 - `all` — 1 lengthscale (with `ard: false`); per-column with `ard: true`
 - `ligand_conditions` — 2: the ligand block vs. the shared one-hot block

@@ -1,9 +1,0 @@
-ligand,id,kraken_name,can_smiles
-XPhos,1,Xphos,CC(C)c1cc(C(C)C)c(-c2ccccc2P(C2CCCCC2)C2CCCCC2)c(C(C)C)c1
-SPhos,3,SPhos,COc1cccc(OC)c1-c1ccccc1P(C1CCCCC1)C1CCCCC1
-P(tBu)3,8,PtBu3,CC(C)(C)P(C(C)(C)C)C(C)(C)C
-P(o-Tol)3,9,PoTol3,Cc1ccccc1P(c1ccccc1C)c1ccccc1C
-CataCXium A,10,"PAd2nBu, CataCXium A",CCCCP(C12CC3CC(C2)CC(C1)C3)C12CC3CC(C2)CC(C1)C3
-P(Cy)3,11,PCy3,C1CCC(P(C2CCCCC2)C2CCCCC2)CC1
-P(Ph)3,17,PPh3,c1ccc(P(c2ccccc2)c2ccccc2)cc1
-AmPhos,216,Ata Phos / AmPhos,CN(C)c1ccc(P(C(C)(C)C)C(C)(C)C)cc1

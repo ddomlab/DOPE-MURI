@@ -1,0 +1,8 @@
+model,ligand_features,ligand_descriptors,rxnpredict_descriptors,numeric_inputs,onehot_inputs,encoded_inputs,categorical_fields
+ligand_ohe,Ligand identity one-hot,0,0,0,44,44,"ligand, aryl_halide, base, additive"
+selected_2,Boltzmann-average and minimum buried volume,2,0,2,40,42,"aryl_halide, base, additive"
+selected_5,"Buried volume boltz/min/range, dipole, HOMO-LUMO gap",5,0,5,40,45,"aryl_halide, base, additive"
+pc_top,"Top 3 Kraken descriptors from each of PC1-PC4, deduplicated",12,0,12,40,52,"aryl_halide, base, additive"
+pc_scores,PCA dimension reduction: the PC1-PC4 component scores,4,0,4,40,44,"aryl_halide, base, additive"
+rxnpredict_full,"Published DFT descriptors for all four components, no one-hot block",0,120,120,0,120,(none)
+rxnpredict_full_ohe,The same DFT descriptors plus the shared one-hot block,0,120,120,40,160,"aryl_halide, base, additive"

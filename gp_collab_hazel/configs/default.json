@@ -2,7 +2,7 @@
   "schema_version": 1,
   "paths": {
     "bundle": "inputs",
-    "runs": "runs/ard_v2"
+    "runs": "runs/pcs_v3"
   },
   "run": {
     "models": [
@@ -10,8 +10,7 @@
       "selected_2",
       "selected_5",
       "pc_top",
-      "pc_scores",
-      "pc_scores_long"
+      "pc_scores"
     ],
     "methods": [
       "lolo",
@@ -20,14 +19,7 @@
     ],
     "seed": 42,
     "stratify": true,
-    "threads": 4,
-    "model_overrides": {
-      "pc_scores_long": {
-        "n_epochs": 1600,
-        "restarts": 3,
-        "walltime": "02:00:00"
-      }
-    }
+    "threads": 4
   },
   "gp": {
     "kernel": "RBF",

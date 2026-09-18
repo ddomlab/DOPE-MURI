@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "n_rows": 3072,
+  "n_tasks": 110,
+  "config_hash": "59b05a03f944c6ea882a8190e1d7a7cfe3301fd2619a91025535e25806d0fa3e",
+  "files": {
+    "config.json": "98b0e25989884be3304cf82fe993189878781f2215a148d7d597de89f6d32c1c",
+    "ligand_features.csv": "fc627877389f369c44012f79308ba2380a28ac620c5bc651e93d6a74de5379b2",
+    "ligand_mapping.csv": "b763eac50e3b5e01d435a9bc500559a4c70baeb3d1a4b256f78acc0450e2f0f1",
+    "model_features.csv": "5e4f758acf3f31b39afc073ba9fbaeccf4d1c053342b071176ab87fb94330601",
+    "pca_loadings.csv": "14c55b8c5ae225c7031db0c20ee8aab9f91d2c9140b6eac29062b351cbcd748a",
+    "pca_reference.json": "ffa90bb8cbde685da6d92f36a919dca68f690e0d7c3ce8a95346f7f6dd397256",
+    "pca_reference.npz": "37112b0aa84a0e53e6df38fb746aa9d6e3369c235ccaa5f0353d3a91436b25cd",
+    "reactions.csv": "59309a987110878067910d8486b11c3d2cfa259114d699007cd185a1572a832c"
+  },
+  "bundle_id": "be68da5332fc1cb8253df14a8e615088a4d31f40427f2b11a8643cccd4550b8c",
+  "note": "Covers exactly the files in this directory. The earlier manifest was inherited from the full hazel_gp bundle and listed files this clone does not ship, so its hashes no longer described anything here."
+}

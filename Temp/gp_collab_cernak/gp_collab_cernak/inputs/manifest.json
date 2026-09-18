@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "dataset": "cernak_suzuki_informer_2023",
+  "n_rows": 1320,
+  "n_models": 1,
+  "n_methods": 3,
+  "config_hash": "b4c3fc7061d1d77ff6fd5c7ebed1e44059212793deda22b733387fb7a9229866",
+  "files": {
+    "audit.json": "e93d503b82985ced39ecefe6d1a16bb5020558f75335c9496a46533d52aa7707",
+    "config.json": "e6f1e922b91e8628b47ac311d30298befd75cb9a1de4d67a90ae811c5f304148",
+    "model_features.csv": "84f44ebecb303207425f8b0df38bbf0b07092a5d66d0bb98a1df1309ce921837",
+    "model_table.csv": "33a9860f3fa92fc11b534a63f283e9e9f020ad4f023e6ace8e334a1c1f199b94",
+    "reactions.csv": "74034b1cda7881e56f84bf2e653a64240abf8d467806fcfe47260101fdf1be48",
+    "reagent_smiles.csv": "b8e0a8f35cbf94ca21e759f85d155d804c73023e022ee30a9b930df0c25e447c"
+  },
+  "bundle_id": "076fa96ab44a0d5517783b3d078c328a8355ca4c3dea6fdc4d14b63f38b4d47b"
+}

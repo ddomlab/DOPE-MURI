@@ -1,0 +1,2 @@
+model,features,numeric_inputs,onehot_inputs,encoded_inputs,categorical_fields
+catalyst_ohe,"Precatalyst identity and every reagent choice, one-hot",0,34,34,"catalyst, base, cosolvent, core, monomer"

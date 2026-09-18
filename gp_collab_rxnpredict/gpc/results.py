@@ -123,7 +123,10 @@ def grouped_predictions(predictions, model, method="iid_matched"):
     return out
 
 
-MODEL_LABELS = {"pc_scores": "PC loading", "pc_scores_long": "PC loading (long)"}
+# `pc_scores` is the PCA reduction itself: PC1..PC4. It was once a loading-weighted
+# expansion of all 190 reference descriptors, so runs collected before that change
+# carry the OLD meaning under the same key -- do not plot them alongside new ones.
+MODEL_LABELS = {"pc_scores": "PC scores", "pc_scores_long": "PC scores (long)"}
 # Canonical left-to-right order for every figure and table, so the hazel and
 # rxnpredict reviews read the same way regardless of the order a run's config
 # happened to list its models in. Anything unlisted keeps its collected order

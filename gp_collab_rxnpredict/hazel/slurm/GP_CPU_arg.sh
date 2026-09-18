@@ -9,7 +9,7 @@
 # cpus-per-task matches "threads" in configs/default.json -- change both together.
 
 DATE=$(date +%Y%m%d)
-run_tag="rxnpredict_ard_v2"
+run_tag="rxnpredict_pcs_v3"
 conda_env="/usr/local/usrapps/ddomlab/kagoble/gp_collab_hazel_py312"
 project_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 runs="runs/${run_tag}_cpu"

@@ -1,0 +1,35 @@
+model,position,feature,source_field,block
+catalyst_ohe,1,cat__catalyst_Aphos G3,catalyst,group
+catalyst_ohe,2,cat__catalyst_RuPhos G3,catalyst,group
+catalyst_ohe,3,cat__catalyst_Xphos G3,catalyst,group
+catalyst_ohe,4,cat__catalyst_tBu3P G2,catalyst,group
+catalyst_ohe,5,cat__catalyst_tBuXphos G3,catalyst,group
+catalyst_ohe,6,cat__base_BTMG,base,reagent
+catalyst_ohe,7,cat__base_BTTP,base,reagent
+catalyst_ohe,8,cat__base_K3PO4,base,reagent
+catalyst_ohe,9,cat__base_P2-Et,base,reagent
+catalyst_ohe,10,cat__cosolvent_H2O (25%),cosolvent,reagent
+catalyst_ohe,11,cat__cosolvent_None,cosolvent,reagent
+catalyst_ohe,12,cat__cosolvent_t-AmOH (25%),cosolvent,reagent
+catalyst_ohe,13,cat__core_Core_01,core,reagent
+catalyst_ohe,14,cat__core_Core_02,core,reagent
+catalyst_ohe,15,cat__core_Core_03,core,reagent
+catalyst_ohe,16,cat__core_Core_04,core,reagent
+catalyst_ohe,17,cat__core_Core_05,core,reagent
+catalyst_ohe,18,cat__core_Core_06,core,reagent
+catalyst_ohe,19,cat__core_Core_07,core,reagent
+catalyst_ohe,20,cat__core_Core_08,core,reagent
+catalyst_ohe,21,cat__core_Core_09,core,reagent
+catalyst_ohe,22,cat__core_Core_10,core,reagent
+catalyst_ohe,23,cat__core_Core_11,core,reagent
+catalyst_ohe,24,cat__core_Core_12,core,reagent
+catalyst_ohe,25,cat__monomer_MFCD00674177,monomer,reagent
+catalyst_ohe,26,cat__monomer_MFCD03788418,monomer,reagent
+catalyst_ohe,27,cat__monomer_MFCD03789252,monomer,reagent
+catalyst_ohe,28,cat__monomer_MFCD05663845,monomer,reagent
+catalyst_ohe,29,cat__monomer_MFCD05663854,monomer,reagent
+catalyst_ohe,30,cat__monomer_MFCD09999194,monomer,reagent
+catalyst_ohe,31,cat__monomer_MFCD11878349,monomer,reagent
+catalyst_ohe,32,cat__monomer_MFCD16994280,monomer,reagent
+catalyst_ohe,33,cat__monomer_MFCD18383786,monomer,reagent
+catalyst_ohe,34,cat__monomer_MFCD19439767,monomer,reagent

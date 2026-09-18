@@ -18,9 +18,12 @@ from gpc.splits import make_folds, parse_method
 ROOT = Path(__file__).resolve().parent.parent
 BUNDLE = ROOT / "inputs"
 
-# Encoded input counts recorded in inputs/model_table.csv.
+# Encoded input counts recorded in inputs/model_table.csv. pc_scores is the
+# exception: it is now the PCA reduction (PC1..PC4 + the 40 shared one-hot
+# columns), not the 760-column loading expansion model_table.csv still lists as
+# 800. Set features.pc_scores_form to loading_weighted to get 800 back.
 WIDTHS = {"ligand_ohe": 44, "selected_2": 42, "selected_5": 45, "pc_top": 52,
-          "pc_scores": 800, "rxnpredict_full": 120, "rxnpredict_full_ohe": 160}
+          "pc_scores": 44, "rxnpredict_full": 120, "rxnpredict_full_ohe": 160}
 
 
 @pytest.fixture(scope="module")

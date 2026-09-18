@@ -29,7 +29,7 @@ compares it column for column.
 | `selected_2` | 2 | 0 | 2 | 40 | 42 |
 | `selected_5` | 5 | 0 | 5 | 40 | 45 |
 | `pc_top` | 12 | 0 | 12 | 40 | 52 |
-| `pc_scores` | 190 | 0 | 760 | 40 | 800 |
+| `pc_scores` | 4 | 0 | 4 | 40 | 44 |
 | `rxnpredict_full` | 0 | 120 | 120 | 0 | 120 |
 | `rxnpredict_full_ohe` | 0 | 120 | 120 | 40 | 160 |
 
@@ -37,6 +37,15 @@ The shared one-hot block is 15 aryl halides + 3 bases + 22 additives = 40.
 The five ligand-chemistry sets use the **same preprocessor and the same frozen
 Kraken PCA** as the Perera runs -- the PCA files are copied, never refitted, so
 `pc_top` and `pc_scores` mean the same thing in both folders.
+
+`pc_scores` is the PCA reduction itself -- the four component scores PC1-PC4.
+It previously held each of the 190 descriptors times its loading in each
+component (760 numeric columns, no reduction), which `ard: true` renders
+unidentifiable. `features.pc_scores_form` in `inputs/config.json` selects the
+form: `component_scores` is the current default, `loading_weighted` reproduces
+the old one. **Runs recorded before this change carry the old 760-column
+`pc_scores`.** `inputs/model_table.csv` still records the old 190/760/800 row --
+it is a frozen provenance artifact, not a live input.
 
 `rxnpredict_full` is the published baseline: the 120 DFT descriptors and **no**
 one-hot block, as Doyle modelled it. `rxnpredict_full_ohe` adds the shared block

@@ -17,8 +17,11 @@ ROOT = Path(__file__).resolve().parent.parent
 BUNDLE = ROOT / "inputs"
 
 # Encoded input counts published in the DOPE-MURI hazel_gp README (LOLO / IID).
+# pc_scores is the exception: it is now the PCA reduction (PC1..PC4 + the 28
+# shared one-hot columns), not the 760-column loading expansion the old README
+# tabulated as 788. Set features.pc_scores_form to loading_weighted to get 788 back.
 WIDTHS = {"ligand_ohe": (35, 36), "selected_5": (33, 33), "selected_2": (30, 30),
-          "pc_top": (40, 40), "pc_scores": (788, 788)}
+          "pc_top": (40, 40), "pc_scores": (32, 32)}
 
 
 @pytest.fixture(scope="module")
@@ -134,20 +137,23 @@ def test_ard_gives_one_lengthscale_per_feature(tmp_path):
     assert meta["config"]["gp"]["ard"] is True
 
 
-def test_model_override_reaches_the_fit(tmp_path):
-    """pc_scores_long must inherit pc_scores' features but its own GP budget."""
+def test_model_override_mechanism(tmp_path):
+    """run.model_overrides still folds into the gp block for whichever model names it.
+
+    pc_scores_long was removed once pc_scores became the 4-column PC1..PC4
+    projection and no longer needed a longer budget, so this exercises the
+    mechanism with a synthetic override rather than a shipped one.
+    """
+    import copy
     from gpc.train import effective_config
-    from gpc.features import feature_frame
-    from gpc.data import load_bundle
 
     cfg = load_config(ROOT / "configs/default.json")
-    assert effective_config(cfg, "pc_scores_long")["gp"]["n_epochs"] == 1600
-    assert effective_config(cfg, "pc_scores_long")["gp"]["restarts"] == 3
     assert effective_config(cfg, "pc_scores")["gp"]["n_epochs"] == cfg["gp"]["n_epochs"]
-    # walltime is scheduling metadata, never a GP parameter
-    assert "walltime" not in effective_config(cfg, "pc_scores_long")["gp"]
 
-    reactions, ligands, reference, prepared = load_bundle(BUNDLE)
-    a = feature_frame(reactions, ligands, "pc_scores", prepared, reference)
-    b = feature_frame(reactions, ligands, "pc_scores_long", prepared, reference)
-    assert a.columns.equals(b.columns) and a.equals(b)
+    cfg2 = copy.deepcopy(cfg)
+    cfg2["run"]["model_overrides"] = {"pc_scores": {"n_epochs": 999, "walltime": "01:00:00"}}
+    eff = effective_config(cfg2, "pc_scores")["gp"]
+    assert eff["n_epochs"] == 999
+    assert eff["restarts"] == cfg["gp"]["restarts"]      # untouched keys fall through
+    assert "walltime" not in eff                          # scheduling, never a GP parameter
+    assert effective_config(cfg2, "selected_2")["gp"]["n_epochs"] == cfg["gp"]["n_epochs"]
