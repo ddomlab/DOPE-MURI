@@ -18,7 +18,7 @@ output_root="${project_root}/HPC_history/hpc_${DATE}"
 output_dir="${output_root}/${run_tag}"
 mkdir -p "$output_dir" || exit 1
 
-gpu_request="gpu:a100:1"
+gpu_request="gpu:l40:1"
 walltime="03:59:00"
 # Ten epochs into a throwaway run folder first, to size walltime and memory.
 pilot=0

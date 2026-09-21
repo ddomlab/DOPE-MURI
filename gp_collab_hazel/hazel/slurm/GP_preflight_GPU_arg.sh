@@ -12,7 +12,7 @@ output_root="${project_root}/HPC_history/hpc_${DATE}"
 output_dir="${output_root}/preflight"
 mkdir -p "$output_dir" || exit 1
 
-gpu_request="gpu:a100:1"
+gpu_request="gpu:l40:1"
 
 sbatch <<EOT
 #!/bin/bash
