@@ -1,0 +1,16 @@
+# Pins match DOPE-MURI's hazel_gp requirements so both packages run in one
+# environment. Install the CUDA (or CPU) torch wheel first, from the
+# appropriate PyTorch index -- see hazel/setup_environment.sh.
+numpy==2.3.5
+pandas==2.2.3
+scipy==1.17.0
+scikit-learn==1.8.0
+joblib==1.5.3
+tqdm==4.67.1
+torch==2.8.0
+gpytorch==1.15.2
+linear_operator==0.6.1
+
+# Optional. Only the hub reads YAML run configs; the zip always carries JSON,
+# so the cluster environment never needs this.
+pyyaml==6.0.2

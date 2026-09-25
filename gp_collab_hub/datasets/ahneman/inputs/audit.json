@@ -1,0 +1,96 @@
+{
+  "raw_rows": 4599,
+  "dropped_additive_without_descriptors": {
+    "rows": 381,
+    "names": [
+      "5-Phenyl-1,2,4-oxadiazole"
+    ],
+    "rows_with_blank_additive": 192
+  },
+  "dropped_no_aryl_halide_controls": {
+    "rows": 263,
+    "max_yield": 0.0
+  },
+  "kept_rows": 3955,
+  "full_factorial": 3960,
+  "missing_combinations": [
+    [
+      "t-BuBrettPhos",
+      "BTMG",
+      "3-iodopyridine",
+      "3-phenylisoxazole"
+    ],
+    [
+      "t-BuXPhos",
+      "BTMG",
+      "1-chloro-4-ethylbenzene",
+      "3-phenylisoxazole"
+    ],
+    [
+      "t-BuXPhos",
+      "BTMG",
+      "1-chloro-4-ethylbenzene",
+      "4-phenylisoxazole"
+    ],
+    [
+      "t-BuXPhos",
+      "MTBD",
+      "1-bromo-4-(trifluoromethyl)benzene",
+      "3-methylisoxazole"
+    ],
+    [
+      "t-BuXPhos",
+      "MTBD",
+      "1-iodo-4-(trifluoromethyl)benzene",
+      "3-methylisoxazole"
+    ]
+  ],
+  "rows_per_ligand": {
+    "AdBrettPhos": 990,
+    "XPhos": 990,
+    "t-BuBrettPhos": 989,
+    "t-BuXPhos": 986
+  },
+  "sources": {
+    "data_table.csv": {
+      "url": "https://raw.githubusercontent.com/doylelab/rxnpredict/master/data_table.csv",
+      "sha256": "aa55244a1fc531a0d8867bcf218fd4cb32b9d2dddd42cbb108eb0a52c5b46691",
+      "bytes": 1251468
+    },
+    "ligand.csv": {
+      "url": "https://raw.githubusercontent.com/doylelab/rxnpredict/master/R/ligand.csv",
+      "sha256": "1b96791f1378593df1f2bb0c425a4bf06388b577760a049cbc3fbfe1b9e103ee",
+      "bytes": 3348
+    },
+    "base.csv": {
+      "url": "https://raw.githubusercontent.com/doylelab/rxnpredict/master/R/base.csv",
+      "sha256": "3b3bac99c4dda4a7ee181f7dd951798b1f67f724fcf9451b218e71165e1e5408",
+      "bytes": 418
+    },
+    "aryl_halide.csv": {
+      "url": "https://raw.githubusercontent.com/doylelab/rxnpredict/master/R/aryl_halide.csv",
+      "sha256": "0f979fd7e875f883b2998fb5e23abcb468bb6cef4511c2a64c2ca46397825104",
+      "bytes": 3864
+    },
+    "additive.csv": {
+      "url": "https://raw.githubusercontent.com/doylelab/rxnpredict/master/R/additive.csv",
+      "sha256": "3d9ba693e77b5087a827662d9412cb0c1179eadb2df8480928e31019b2cf597c",
+      "bytes": 4006
+    },
+    "ligand-list.csv": {
+      "url": "https://raw.githubusercontent.com/doylelab/rxnpredict/master/smiles/ligand-list.csv",
+      "sha256": "19c78fede9a3dd3ee8750561a151fe6248aa03d764ecb19b82f0d9574cb23403",
+      "bytes": 426
+    },
+    "output_table.csv": {
+      "url": "https://raw.githubusercontent.com/doylelab/rxnpredict/master/R/output_table.csv",
+      "sha256": "ffbfa7de0ec175ae83a24fa40e1bbbe9c23fbcae8b3a48d259278105fedf5f6f",
+      "bytes": 3201887
+    },
+    "kraken_identifiers.csv": {
+      "url": "https://raw.githubusercontent.com/doyle-lab-ucla/kraken_utils/main/identifiers.csv",
+      "sha256": "091e5ce0e1585cb01d67685c60ec6b5d68aa059e513dc3072a8efd17bc291fc0",
+      "bytes": 247297
+    }
+  }
+}

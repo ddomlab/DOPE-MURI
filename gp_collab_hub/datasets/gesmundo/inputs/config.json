@@ -1,0 +1,44 @@
+{
+  "schema_version": 2,
+  "dataset": "gesmundo",
+  "display_name": "Gesmundo",
+  "source": "https://github.com/cernaklab/medchem-reaction-miniaturization",
+  "data": {
+    "target": "conversion",
+    "group": "catalyst",
+    "common_categorical": [
+      "base",
+      "cosolvent",
+      "core",
+      "monomer"
+    ],
+    "expected_rows": 1320,
+    "expected_groups": 5
+  },
+  "features": {
+    "models": [
+      "group_ohe",
+      "selected_2",
+      "vbur_min_vmin",
+      "vbur_boltz_vmin",
+      "selected_5",
+      "pc_top",
+      "pc_scores"
+    ],
+    "pca_reference": "full_original_kraken",
+    "pca_components": 4,
+    "top_per_pc": 3,
+    "pc_scores_form": "component_scores",
+    "ohe_policy": "train_ignore_unknown"
+  },
+  "evaluation": {
+    "methods": [
+      "lolo",
+      "iid_stratified_5",
+      "kfold_stratified_5",
+      "kfold_5"
+    ],
+    "seed": 42,
+    "stratify_on": "catalyst"
+  }
+}

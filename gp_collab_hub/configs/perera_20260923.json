@@ -1,0 +1,57 @@
+{
+  "schema_version": 2,
+  "dataset": "perera",
+  "run_tag": null,
+  "paths": {
+    "bundle": "datasets/perera/inputs",
+    "runs": "runs/local"
+  },
+  "run": {
+    "models": [
+      "group_ohe",
+      "selected_2",
+      "selected_5",
+      "pc_top",
+      "pc_scores"
+    ],
+    "methods": [
+      "lolo",
+      "iid_stratified_8",
+      "kfold_stratified_5",
+      "kfold_5"
+    ],
+    "seed": 42,
+    "stratify": true,
+    "threads": 4,
+    "model_overrides": {},
+    "feature_columns": {}
+  },
+  "gp": {
+    "kernel": "RBF",
+    "grouping": "all",
+    "mixing_method": "product",
+    "ard": true,
+    "dtype": "float32",
+    "noise": null,
+    "noise_floor": 0.01,
+    "outputscale": null,
+    "train_jitter": 0.0001,
+    "predict_jitter": 0.0001,
+    "restarts": 1,
+    "n_epochs": 400,
+    "learning_rate": 0.01,
+    "prior": true,
+    "normalize_y": true,
+    "use_cuda": true
+  },
+  "hpc": {
+    "conda_env": "/usr/local/usrapps/ddomlab/kagoble/gp_collab_hub_py312",
+    "walltime": "03:59:00",
+    "cpu_walltime": "05:59:00",
+    "gpu_request": "gpu:l40:1",
+    "mem": "16G",
+    "cpus_per_task": 4,
+    "pilot": 0,
+    "submit_collection": 1
+  }
+}

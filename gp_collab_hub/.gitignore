@@ -1,0 +1,10 @@
+
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+exports/*.zip
+results/*/
+runs/
+HPC_history/
+datasets/*/raw/
+.pytest_cache/
