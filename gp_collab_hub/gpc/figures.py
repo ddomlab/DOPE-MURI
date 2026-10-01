@@ -186,6 +186,29 @@ FEATURESET_LABELS = {
     "pc_top": "PC top", "pc_scores": "PC scores",
     "pc_scores_long": "PC scores (long)",
     "rxnpredict_full": "Published DFT", "rxnpredict_full_ohe": "Published DFT + OHE",
+    # ahneman_doyle: the 120 descriptors Doyle's random forest used, alone and
+    # with one Kraken ligand section appended.
+    "doyle_full": "Doyle DFT",
+    "doyle_full_group_ohe": "Doyle DFT + ligand OHE",
+    "doyle_full_selected_2": "Doyle DFT + Selected-2",
+    "doyle_full_vbur_min_vmin": r"Doyle DFT + $V_\mathrm{bur}$ min + $V_\mathrm{min}$",
+    "doyle_full_vbur_boltz_vmin": r"Doyle DFT + $V_\mathrm{bur}$ boltz + $V_\mathrm{min}$",
+    "doyle_full_selected_5": "Doyle DFT + Selected-5",
+    "doyle_full_pc_top": "Doyle DFT + PC top",
+    "doyle_full_pc_scores": "Doyle DFT + PC scores",
+    "doyle_full_kraken_all": "Doyle DFT + all Kraken",
+    # In place of Doyle's 64 ligand descriptors: their 56 condition descriptors
+    # (additive + aryl halide + base) with our ligand representation.
+    "doyle_cond_group_ohe": "Doyle cond. + ligand OHE",
+    "doyle_cond_selected_2": "Doyle cond. + Selected-2",
+    "doyle_cond_vbur_min_vmin": r"Doyle cond. + $V_\mathrm{bur}$ min + $V_\mathrm{min}$",
+    "doyle_cond_vbur_boltz_vmin": r"Doyle cond. + $V_\mathrm{bur}$ boltz + $V_\mathrm{min}$",
+    "doyle_cond_selected_5": "Doyle cond. + Selected-5",
+    "doyle_cond_pc_top": "Doyle cond. + PC top",
+    "doyle_cond_pc_scores": "Doyle cond. + PC scores",
+    "doyle_cond_kraken_all": "Doyle cond. + all Kraken",
+    # The mirror: Doyle's ligand descriptors, our condition one-hots.
+    "doyle_ligand_cond_ohe": "Doyle ligand + condition OHE",
 }
 METHOD_DISPLAY = {"lolo": "LOLO", "iid_matched": "Matched IID", "kfold": "5-fold CV",
                   "kfold_5": "5-fold CV (unstratified)", "holdout": "80:20 split"}

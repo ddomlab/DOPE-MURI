@@ -1,0 +1,82 @@
+{
+  "sources": {
+    "reizman_suzuki_case_1.csv": {
+      "url": "https://raw.githubusercontent.com/sustainable-processes/summit/249751d57c3603fda99437b35656a1d78e2f0371/summit/benchmarks/data/reizman_suzuki_case_1.csv",
+      "sha256": "346d976b89241662965f047b6725a9972941afb4c12105e82947cf9e2a27a450",
+      "bytes": 3275
+    },
+    "reizman_suzuki_case_2.csv": {
+      "url": "https://raw.githubusercontent.com/sustainable-processes/summit/249751d57c3603fda99437b35656a1d78e2f0371/summit/benchmarks/data/reizman_suzuki_case_2.csv",
+      "sha256": "20f648b7e48a40059d4ba990161d0ad21cf255c45cdc90e6fa52a0e9b4150f3f",
+      "bytes": 3216
+    },
+    "reizman_suzuki_case_3.csv": {
+      "url": "https://raw.githubusercontent.com/sustainable-processes/summit/249751d57c3603fda99437b35656a1d78e2f0371/summit/benchmarks/data/reizman_suzuki_case_3.csv",
+      "sha256": "cb57a2a8a4075ff312508e48673b3b4f22667b8fc609f7c60b57bb4f357a36b9",
+      "bytes": 3309
+    },
+    "reizman_suzuki_case_4.csv": {
+      "url": "https://raw.githubusercontent.com/sustainable-processes/summit/249751d57c3603fda99437b35656a1d78e2f0371/summit/benchmarks/data/reizman_suzuki_case_4.csv",
+      "sha256": "fb2f2bd7eae04495f75a91996e309cc3f4f688a4fa02d7ef9e556246ce8bbf75",
+      "bytes": 3446
+    }
+  },
+  "summit_commit": "249751d57c3603fda99437b35656a1d78e2f0371",
+  "paper": "https://doi.org/10.1039/d0qo00544d",
+  "data_origin": "Reizman et al., React. Chem. Eng. 2016, 1, 658 (10.1039/C6RE00153J)",
+  "rows": {
+    "experiments": 385,
+    "paper_reports": 387,
+    "dropped_ligand": {
+      "names": [
+        "XantPhos"
+      ],
+      "rows": 53,
+      "by_case": {
+        "1": 37,
+        "2": 5,
+        "3": 5,
+        "4": 6
+      },
+      "reason": "bidentate XantPhos is not in Kraken (monophosphines only)"
+    },
+    "kept": 332
+  },
+  "replicate_rows_sharing_conditions": 41,
+  "case_scheme": {
+    "1": {
+      "aryl_halide": "3-bromoquinoline",
+      "aryl_halide_smiles": "Brc1cnc2ccccc2c1",
+      "boron_reagent": "3,5-dimethylisoxazole-4-boronic acid pinacol ester",
+      "boron_reagent_smiles": "Cc1noc(C)c1B1OC(C)(C)C(C)(C)O1",
+      "fu_scheme": "1c-2a"
+    },
+    "2": {
+      "aryl_halide": "3-chloropyridine",
+      "aryl_halide_smiles": "Clc1cccnc1",
+      "boron_reagent": "3,5-dimethylisoxazole-4-boronic acid pinacol ester",
+      "boron_reagent_smiles": "Cc1noc(C)c1B1OC(C)(C)C(C)(C)O1",
+      "fu_scheme": "1a-2a"
+    },
+    "3": {
+      "aryl_halide": "3-chloropyridine",
+      "aryl_halide_smiles": "Clc1cccnc1",
+      "boron_reagent": "benzofuran-2-boronic acid",
+      "boron_reagent_smiles": "OB(O)c1cc2ccccc2o1",
+      "fu_scheme": "1a-2b"
+    },
+    "4": {
+      "aryl_halide": "2-chloropyridine",
+      "aryl_halide_smiles": "Clc1ccccn1",
+      "boron_reagent": "N-Boc-pyrrole-2-boronic acid",
+      "boron_reagent_smiles": "CC(C)(C)OC(=O)n1cccc1B(O)O",
+      "fu_scheme": "1b-2c"
+    }
+  },
+  "units": {
+    "temperature": "degC",
+    "catalyst_loading": "mol%",
+    "t_res": "s",
+    "yield": "%"
+  }
+}

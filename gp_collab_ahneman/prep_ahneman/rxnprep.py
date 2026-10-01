@@ -304,7 +304,9 @@ def default_config() -> dict:
             "pca_components": 4, "top_per_pc": 3,
             "pc_scores_form": "loading_weighted", "ohe_policy": "train_ignore_unknown"},
         "evaluation": {
-            "methods": ["lolo", "iid_stratified_4", "kfold_stratified_5"],
+            # kfold_5 is the same 5-fold without stratification, so the two can be
+            # compared directly; the name carries the fold count and the choice.
+            "methods": ["lolo", "iid_stratified_4", "kfold_stratified_5", "kfold_5"],
             "seed": 42, "stratify_on": GROUP},
     }
 

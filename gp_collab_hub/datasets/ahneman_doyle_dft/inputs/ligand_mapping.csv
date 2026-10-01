@@ -1,0 +1,5 @@
+ligand,kraken_id,kraken_name,can_smiles
+XPhos,1,Xphos,CC(C)c1cc(C(C)C)c(-c2ccccc2P(C2CCCCC2)C2CCCCC2)c(C(C)C)c1
+t-BuXPhos,90,tBuXPhos,CC(C)c1cc(C(C)C)c(-c2ccccc2P(C(C)(C)C)C(C)(C)C)c(C(C)C)c1
+t-BuBrettPhos,89,tBuBrettPhos,COc1ccc(OC)c(P(C(C)(C)C)C(C)(C)C)c1-c1c(C(C)C)cc(C(C)C)cc1C(C)C
+AdBrettPhos,347,AdBrettPhos,COc1ccc(c(c1c1c(cc(cc1C(C)C)C(C)C)C(C)C)P(C12CC3CC(C2)CC(C1)C3)C12CC3CC(C2)CC(C1)C3)OC

@@ -24,7 +24,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from .config import read_json, validate_config
+from .config import check_run_against_bundle, read_json, validate_config
 from .splits import parse_method
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -42,6 +42,8 @@ TEST_GLOBS = ("tests/*.py",)
 # so they are carried only when `full_inputs` is set.
 BUNDLE_REQUIRED = ("config.json", "reactions.csv", "ligand_features.csv",
                    "pca_reference.json", "pca_reference.npz")
+# Plus, for a bundle whose config.json declares "reaction_features", that file
+# (`reaction_features.csv`) -- added to the required list per bundle in write_zip.
 BUNDLE_OPTIONAL = ("ligand_mapping.csv", "manifest.json")
 BUNDLE_EXTRA = ("audit.json", "model_features.csv", "model_table.csv", "pca_loadings.csv")
 
@@ -227,6 +229,7 @@ def write_zip(cfg: dict, dataset: str | None = None, out=None, config_path=None,
         print(f"--dataset {dataset}: methods taken from its bundle -> "
               f"{cfg['run']['methods']}")
     check_methods(cfg["run"]["methods"], prepared)
+    check_run_against_bundle(cfg["run"]["models"], prepared, cfg["gp"])
     tag = run_tag(cfg)
     hpc = hpc_block(cfg)
 
@@ -280,13 +283,17 @@ def write_zip(cfg: dict, dataset: str | None = None, out=None, config_path=None,
                 add_bytes(source.relative_to(ROOT).as_posix(),
                           _retarget_scripts(text, tag, hpc).encode("utf-8"))
 
-        names = list(BUNDLE_REQUIRED) + list(BUNDLE_OPTIONAL)
+        # A bundle that declares a reaction-level descriptor table needs it at
+        # load time, whichever sections this run asks for, so it is required.
+        declared = (prepared.get("reaction_features") or {}).get("file")
+        required = list(BUNDLE_REQUIRED) + ([declared] if declared else [])
+        names = required + list(BUNDLE_OPTIONAL)
         if full_inputs:
             names += list(BUNDLE_EXTRA)
         for name in names:
             source = inputs / name
             if not source.exists():
-                if name in BUNDLE_REQUIRED:
+                if name in required:
                     raise FileNotFoundError(f"{inputs} is missing {name}")
                 continue
             if name == "ligand_features.csv" and not full_inputs:

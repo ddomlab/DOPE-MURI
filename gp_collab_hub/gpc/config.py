@@ -63,7 +63,58 @@ SELECTED_SETS = {
     "vbur_boltz_vmin": ["vbur_pct_boltz", VMIN],
 }
 
-MODELS = [*GROUP_OHE_KEYS, *SELECTED_SETS, "pc_top", "pc_scores", "pc_scores_long"]
+# Sections built on a bundle's REACTION-level descriptor table rather than on the
+# shared one-hot block. Only a bundle that ships `reaction_features.csv` (and
+# declares it under "reaction_features" in its config.json) can run them; today
+# that is `ahneman_doyle_dft`, whose table is the 120 DFT descriptors Ahneman et
+# al. fed their random forest -- additive, aryl halide, base and ligand, joined
+# per reaction, exactly the columns of Doyle's R/output_table.csv.
+#
+# The table splits in two by column prefix (`config.reaction_blocks`): the GROUP
+# block -- the group component's own descriptors, `ligand_*` on Ahneman, 64 --
+# and the CONDITION block, everything else (additive + aryl halide + base, 56).
+#
+# Each section is a spec:
+#   doyle         which of Doyle's columns: "all" (120), "conditions" (56) or
+#                 "group" (64)
+#   ligand        what ligand representation is added: None, a Kraken section
+#                 name, KRAKEN_ALL (all 190 raw Kraken descriptors -- the
+#                 reference PCA's inputs) or "group_ohe" (ligand one-hot)
+#   condition_ohe True adds the bundle's condition one-hots (common_categorical)
+#
+# Three families, so "our ligand chemistry ADDED to Doyle's" and "our ligand
+# chemistry IN PLACE of Doyle's" line up section for section:
+#   doyle_full_<x>      all 120 Doyle descriptors + our ligand representation x
+#   doyle_cond_<x>      Doyle's 56 condition descriptors + x, in place of their
+#                       64 ligand descriptors
+#   doyle_ligand_cond_ohe  Doyle's 64 ligand descriptors + our condition one-hots
+#                       -- the mirror image: their ligand, our conditions
+KRAKEN_ALL = "kraken_all"
+LIGAND_REPRESENTATIONS = ("group_ohe", "selected_2", "vbur_min_vmin", "vbur_boltz_vmin",
+                          "selected_5", "pc_top", "pc_scores", KRAKEN_ALL)
+
+
+def _spec(doyle, ligand=None, condition_ohe=False):
+    return {"doyle": doyle, "ligand": ligand, "condition_ohe": condition_ohe}
+
+
+REACTION_SECTIONS = {
+    # added: Doyle's full RF input, alone and with our ligand chemistry on top
+    "doyle_full": _spec("all"),
+    **{f"doyle_full_{x}": _spec("all", x) for x in LIGAND_REPRESENTATIONS},
+    # in place: Doyle's condition descriptors, our ligand representation
+    **{f"doyle_cond_{x}": _spec("conditions", x) for x in LIGAND_REPRESENTATIONS},
+    # their ligand descriptors, our condition one-hots
+    "doyle_ligand_cond_ohe": _spec("group", None, condition_ohe=True),
+}
+REACTION_FAMILIES = {
+    "added": [m for m in REACTION_SECTIONS if m.startswith("doyle_full")],
+    "in_place": [m for m in REACTION_SECTIONS if m.startswith("doyle_cond_")],
+    "doyle_ligand": ["doyle_ligand_cond_ohe"],
+}
+
+MODELS = [*GROUP_OHE_KEYS, *SELECTED_SETS, "pc_top", "pc_scores", "pc_scores_long",
+          *REACTION_SECTIONS]
 # Sections whose descriptor list `run.feature_columns` may redefine.
 REDEFINABLE = (*SELECTED_SETS, "pc_top")
 
@@ -125,6 +176,12 @@ def read_any(path: str | Path) -> Any:
 def write_yaml(path: str | Path, obj: Any) -> None:
     """Companion YAML copy of a run config, for hand editing. Optional."""
     import yaml
+    # A half-installed PyYAML imports as an empty namespace package; report it the
+    # same way as a missing one, so callers that skip the YAML copy on ImportError
+    # (build_run.ipynb, the intake notebooks) skip it here too.
+    if not hasattr(yaml, "safe_dump"):
+        raise ImportError("PyYAML is installed incompletely (no yaml.safe_dump); "
+                          "reinstall it with `pip install --force-reinstall pyyaml`")
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(yaml.safe_dump(json.loads(json.dumps(obj, default=_jsonable)),
@@ -186,6 +243,82 @@ def bundle_target(prepared: dict) -> str:
 
 def bundle_group(prepared: dict) -> str:
     return prepared["data"].get("group", GROUP)
+
+
+def reaction_columns(prepared: dict) -> list[str]:
+    """The reaction-level descriptor columns this bundle declares, or [] if none."""
+    block = prepared.get("reaction_features") or {}
+    return list(block.get("columns", []))
+
+
+def condition_numeric(prepared: dict) -> list[str]:
+    """Continuous condition columns every section carries, or [] if none.
+
+    A bundle lists them under `data.common_numeric`. Reizman_Summit varies
+    temperature, catalyst loading and residence time continuously; the other
+    bundles vary only discrete components and have none.
+    """
+    return list(prepared.get("data", {}).get("common_numeric", []))
+
+
+def check_run_against_bundle(models, prepared: dict, gp: dict | None = None) -> None:
+    """Every refusal that needs both the run config and the bundle, in one call.
+
+    The zip builder and build_run.ipynb call this, so a mismatch fails on the
+    laptop. Besides the doyle_* checks: a bundle with continuous conditions puts
+    them in the encoded matrix as `num__` columns, and every kernel grouping
+    other than "all" assigns `num__` columns to the ligand kernel -- so a
+    temperature would be modelled as ligand chemistry. Only "all" is meaningful.
+    """
+    check_reaction_sections(models, prepared, gp)
+    if condition_numeric(prepared) and gp is not None and gp.get("grouping", "all") != "all":
+        raise ValueError(
+            f"{bundle_name(prepared)} has continuous conditions "
+            f"{condition_numeric(prepared)}, which the split groupings would put in the "
+            f"ligand kernel, so gp.grouping must be 'all' (got {gp['grouping']!r}).")
+
+
+def reaction_blocks(prepared: dict) -> dict[str, list[str]]:
+    """The reaction table split into the group's own descriptors and the rest.
+
+    A column belongs to the group block when it carries the group component's
+    prefix -- `ligand_*` on Ahneman, which is how Doyle's tables name them. Both
+    blocks must be non-empty, or the in-place sections would silently lose (or
+    keep) the very descriptors they exist to swap out.
+    """
+    columns = reaction_columns(prepared)
+    group = bundle_group(prepared)
+    own = [c for c in columns if c.startswith(f"{group}_")]
+    rest = [c for c in columns if not c.startswith(f"{group}_")]
+    if columns and (not own or not rest):
+        raise ValueError(f"reaction_features does not split into {group}_* and condition "
+                         f"columns ({len(own)} / {len(rest)})")
+    return {"all": columns, "group": own, "conditions": rest}
+
+
+def check_reaction_sections(models, prepared: dict, gp: dict | None = None) -> None:
+    """Refuse a `doyle_*` section on a bundle that cannot run it.
+
+    Called by the zip builder, so a Perera run asking for `doyle_full` fails on
+    the laptop rather than as a KeyError in every cluster job. The kernel
+    groupings other than "all" split columns by `num__` (group) versus `cat__`
+    (condition) prefix, which is wrong here: Doyle's condition descriptors are
+    numeric, so they would land in the ligand kernel. Only `grouping: "all"` is
+    meaningful for these sections.
+    """
+    wanted = [m for m in models if m in REACTION_SECTIONS]
+    if not wanted:
+        return
+    if not reaction_columns(prepared):
+        raise ValueError(
+            f"{wanted} need a reaction-level descriptor table, and the "
+            f"{bundle_name(prepared)} bundle has none. Use the ahneman_doyle bundle "
+            f"(datasets/ahneman_doyle/), or drop these sections.")
+    if gp is not None and gp.get("grouping", "all") != "all":
+        raise ValueError(
+            f"{wanted} carry numeric condition descriptors, which the split "
+            f"groupings would put in the ligand kernel, so gp.grouping must be "
+            f"'all' (got {gp['grouping']!r}).")
 
 
 def bundle_name(prepared: dict) -> str:

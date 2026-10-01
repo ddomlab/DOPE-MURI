@@ -23,8 +23,9 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from .config import (FIVE, GROUP_OHE_KEYS, REDEFINABLE, SELECTED_SETS,
-                     TWO, read_json)
+from .config import (FIVE, GROUP_OHE_KEYS, KRAKEN_ALL, REACTION_SECTIONS, REDEFINABLE,
+                     SELECTED_SETS, TWO, condition_numeric, reaction_blocks,
+                     reaction_columns, read_json)
 
 
 @dataclass
@@ -174,8 +175,63 @@ def is_group_ohe(model: str) -> bool:
     return model in GROUP_OHE_KEYS
 
 
+def _reaction_section_columns(model: str, cfg: dict, reference) -> tuple[list, list]:
+    """(numeric, categorical) for a doyle_* section, from its REACTION_SECTIONS spec.
+
+    Numeric is the chosen block of Doyle's descriptors followed by any Kraken
+    ligand descriptors; categorical is the group column when the ligand is
+    represented by its one-hot, then the condition fields when the section asks
+    for condition one-hots. Column order within each part is fixed, so a section
+    encodes identically on every run.
+    """
+    if not reaction_columns(cfg):
+        raise ValueError(f"{model} needs a reaction-level descriptor table "
+                         f"(reaction_features.csv) and this bundle has none")
+    spec = REACTION_SECTIONS[model]
+    doyle = reaction_blocks(cfg)[spec["doyle"]]
+    ligand = spec["ligand"]
+    numeric, categorical = list(doyle), []
+    if ligand == "group_ohe":
+        categorical.append(cfg["data"].get("group", "ligand"))
+    elif ligand == KRAKEN_ALL:
+        if reference is None:
+            raise ValueError(f"{model} requires the reference PCA's descriptor list")
+        numeric += list(reference.columns)
+    elif ligand is not None:
+        if ligand == "pc_scores" and pc_scores_form(cfg) == "loading_weighted":
+            raise ValueError(f"{model} supports only the component_scores form of pc_scores")
+        kraken, _ = _section_columns(ligand, cfg, reference)
+        clash = sorted(set(kraken) & set(doyle))
+        if clash:
+            raise ValueError(f"{model}: Kraken and reaction descriptors share names {clash}")
+        numeric += list(kraken)
+    if spec["condition_ohe"]:
+        categorical += list(cfg["data"]["common_categorical"])
+    return numeric, categorical
+
+
 def model_columns(model: str, cfg: dict, reference) -> tuple[list, list]:
-    """(numeric columns, categorical columns) this section feeds the encoder."""
+    """(numeric columns, categorical columns) this section feeds the encoder.
+
+    The section's own columns, then the bundle's continuous condition columns
+    (`data.common_numeric` -- temperature, loading, residence time on
+    Reizman_Summit), which
+    every section carries, exactly as every section carries the condition
+    one-hots. They are numeric because they are continuous: one-hot encoding a
+    temperature would throw away its order and every value between those seen.
+    """
+    numeric, categorical = _section_columns(model, cfg, reference)
+    conditions = condition_numeric(cfg)
+    if conditions and _expands_loadings(model, cfg):
+        raise ValueError("loading_weighted pc_scores cannot be combined with "
+                         "data.common_numeric; use the component_scores form")
+    return numeric + [c for c in conditions if c not in numeric], categorical
+
+
+def _section_columns(model: str, cfg: dict, reference) -> tuple[list, list]:
+    """(numeric, categorical) for the section alone, without common_numeric."""
+    if model in REACTION_SECTIONS:
+        return _reaction_section_columns(model, cfg, reference)
     model = feature_alias(model)
     categorical = list(cfg["data"]["common_categorical"])
     group = cfg["data"].get("group", "ligand")
@@ -199,7 +255,16 @@ def model_columns(model: str, cfg: dict, reference) -> tuple[list, list]:
 def feature_frame(reactions: pd.DataFrame, ligands: pd.DataFrame, model: str,
                   cfg: dict, reference) -> pd.DataFrame:
     num, cat = model_columns(model, cfg, reference)
-    merged = reactions.merge(ligands[["kraken_id"] + num], on="kraken_id", how="left",
+    # Reaction-level descriptors (joined on row_id by load_bundle) and continuous
+    # conditions are already columns of `reactions`; only the Kraken ligand
+    # descriptors are joined here.
+    rxn = set(reaction_columns(cfg)) | set(condition_numeric(cfg))
+    missing = sorted(c for c in rxn & set(num) if c not in reactions.columns)
+    if missing:
+        raise ValueError(f"{model}: reaction-level columns absent from reactions -- was the "
+                         f"bundle loaded with gpc.data.load_bundle? First missing: {missing[:3]}")
+    kraken = [c for c in num if c not in rxn]
+    merged = reactions.merge(ligands[["kraken_id"] + kraken], on="kraken_id", how="left",
                              sort=False, validate="many_to_one")
     if merged[cat].isna().any().any() or len(merged) != len(reactions):
         raise ValueError("Incomplete categorical inputs or expanding feature merge")
@@ -226,7 +291,12 @@ def _preprocessor(frame: pd.DataFrame, model: str, cfg: dict, reference) -> Colu
     vocab = "auto"
     if cfg["features"]["ohe_policy"] == "declared_vocabulary":
         vocab = [sorted(frame[c].unique().tolist()) for c in cat]
-    return ColumnTransformer([
-        ("num", _numeric_pipeline(model, cfg, reference), num),
-        ("cat", OneHotEncoder(categories=vocab, handle_unknown="ignore", sparse_output=False), cat),
-    ], remainder="drop", sparse_threshold=0)
+    transformers = [("num", _numeric_pipeline(model, cfg, reference), num)]
+    # doyle_full_* and doyle_cond_<Kraken> have no categorical block; an empty ColumnTransformer
+    # entry would fit an encoder on nothing, so leave it out entirely (as the
+    # original gp_collab_ahneman engine did for its rxnpredict_full section).
+    if cat:
+        transformers.append(
+            ("cat", OneHotEncoder(categories=vocab, handle_unknown="ignore",
+                                  sparse_output=False), cat))
+    return ColumnTransformer(transformers, remainder="drop", sparse_threshold=0)

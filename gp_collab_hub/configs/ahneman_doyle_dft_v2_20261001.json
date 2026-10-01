@@ -1,0 +1,71 @@
+{
+  "schema_version": 2,
+  "dataset": "ahneman_doyle_dft",
+  "run_tag": "ahneman_doyle_dft_v2_20261001",
+  "paths": {
+    "bundle": "datasets/ahneman_doyle_dft/inputs",
+    "runs": "runs/ahneman_doyle_dft_v2_20261001"
+  },
+  "run": {
+    "models": [
+      "doyle_full",
+      "doyle_full_group_ohe",
+      "doyle_full_selected_2",
+      "doyle_full_vbur_min_vmin",
+      "doyle_full_vbur_boltz_vmin",
+      "doyle_full_selected_5",
+      "doyle_full_pc_top",
+      "doyle_full_pc_scores",
+      "doyle_full_kraken_all",
+      "doyle_cond_group_ohe",
+      "doyle_cond_selected_2",
+      "doyle_cond_vbur_min_vmin",
+      "doyle_cond_vbur_boltz_vmin",
+      "doyle_cond_selected_5",
+      "doyle_cond_pc_top",
+      "doyle_cond_pc_scores",
+      "doyle_cond_kraken_all",
+      "doyle_ligand_cond_ohe"
+    ],
+    "methods": [
+      "lolo",
+      "iid_stratified_4",
+      "kfold_stratified_5",
+      "kfold_5"
+    ],
+    "seed": 42,
+    "stratify": true,
+    "threads": 4,
+    "model_overrides": {},
+    "feature_columns": {}
+  },
+  "gp": {
+    "kernel": "RBF",
+    "grouping": "all",
+    "mixing_method": "product",
+    "ard": true,
+    "dtype": "float32",
+    "noise": null,
+    "noise_floor": 0.01,
+    "outputscale": null,
+    "train_jitter": 0.0001,
+    "predict_jitter": 0.0001,
+    "restarts": 1,
+    "n_epochs": 400,
+    "learning_rate": 0.01,
+    "prior": true,
+    "normalize_y": true,
+    "use_cuda": true
+  },
+  "hpc": {
+    "conda_env": "/usr/local/usrapps/ddomlab/kagoble/gp_collab_hub_py312",
+    "walltime": "00:20:00",
+    "cpu_walltime": "00:20:00",
+    "gpu_request": "gpu:l40:1",
+    "mem": "16G",
+    "cpus_per_task": 4,
+    "pilot": 0,
+    "submit_collection": 1,
+    "collect_walltime": "00:20:00"
+  }
+}

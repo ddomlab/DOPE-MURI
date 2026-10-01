@@ -1,0 +1,50 @@
+{
+  "schema_version": 2,
+  "dataset": "reizman_summit",
+  "display_name": "Reizman_Summit",
+  "source": "https://doi.org/10.1039/d0qo00544d",
+  "data": {
+    "target": "yield",
+    "group": "ligand",
+    "common_categorical": [
+      "aryl_halide",
+      "boron_reagent",
+      "scaffold"
+    ],
+    "common_numeric": [
+      "temperature",
+      "catalyst_loading",
+      "t_res"
+    ],
+    "expected_rows": 332,
+    "expected_groups": 6
+  },
+  "features": {
+    "models": [
+      "group_ohe",
+      "selected_2",
+      "vbur_min_vmin",
+      "vbur_boltz_vmin",
+      "selected_5",
+      "pc_top",
+      "pc_scores"
+    ],
+    "pca_reference": "full_original_kraken",
+    "pca_components": 4,
+    "top_per_pc": 3,
+    "pc_scores_form": "component_scores",
+    "ohe_policy": "train_ignore_unknown"
+  },
+  "evaluation": {
+    "methods": [
+      "lolo",
+      "iid_stratified_6",
+      "kfold_stratified_5",
+      "kfold_5"
+    ],
+    "seed": 42,
+    "stratify_on": "ligand"
+  },
+  "data_origin": "Reizman et al., React. Chem. Eng. 2016, 1, 658 (10.1039/C6RE00153J)",
+  "notes": "group = ligand; scaffold (P1 OMs / P2 Cl) is a condition; XantPhos (L4) rows dropped; continuous conditions numeric"
+}

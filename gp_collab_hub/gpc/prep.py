@@ -90,7 +90,8 @@ def add_row_ids(reactions: pd.DataFrame) -> pd.DataFrame:
 
 def bundle_config(dataset: str, display_name: str, target: str, group: str,
                   categorical, reactions: pd.DataFrame, models=None, methods=None,
-                  source: str = "", seed: int = 42, extra: dict | None = None) -> dict:
+                  source: str = "", seed: int = 42, extra: dict | None = None,
+                  numeric=()) -> dict:
     """The bundle's config.json: what this dataset IS.
 
     Row and group counts are recorded from the frame being written, so
@@ -114,6 +115,7 @@ def bundle_config(dataset: str, display_name: str, target: str, group: str,
             "target": target,
             "group": group,
             "common_categorical": list(categorical),
+            **({"common_numeric": list(numeric)} if numeric else {}),
             "expected_rows": int(len(reactions)),
             "expected_groups": n_groups,
         },
@@ -157,6 +159,14 @@ def check_bundle(reactions: pd.DataFrame, cfg: dict, ligands: pd.DataFrame) -> p
     record("condition columns present",
            all(c in reactions for c in data["common_categorical"]),
            ", ".join(data["common_categorical"]))
+    numeric = data.get("common_numeric", [])
+    if numeric:
+        values = reactions[[c for c in numeric if c in reactions]].apply(
+            pd.to_numeric, errors="coerce")
+        record("continuous condition columns present and finite",
+               all(c in reactions for c in numeric)
+               and np.isfinite(values.to_numpy(dtype=float)).all(),
+               ", ".join(numeric))
     record("kraken_id on every row",
            "kraken_id" in reactions and reactions["kraken_id"].notna().all(),
            f"{reactions['kraken_id'].nunique() if 'kraken_id' in reactions else 0} ids")
@@ -191,21 +201,81 @@ def check_bundle(reactions: pd.DataFrame, cfg: dict, ligands: pd.DataFrame) -> p
     return table
 
 
+REACTION_FEATURES_FILE = "reaction_features.csv"
+
+
+def declare_reaction_features(cfg: dict, table: pd.DataFrame, name: str,
+                              source: str = "", description: str = "") -> dict:
+    """Record a reaction-level descriptor table in the bundle config.
+
+    `table` is `row_id` plus one numeric column per descriptor. The column list
+    is written into config.json so the engine knows the section widths without
+    reading the data, and `load_bundle` can refuse a file that drifted from it.
+    """
+    columns = [c for c in table.columns if c != "row_id"]
+    out = dict(cfg)
+    out["reaction_features"] = {"file": REACTION_FEATURES_FILE, "name": name,
+                                "source": source, "description": description,
+                                "n_columns": len(columns), "columns": columns}
+    return out
+
+
+def check_reaction_features(reactions: pd.DataFrame, table: pd.DataFrame,
+                            cfg: dict, ligands: pd.DataFrame) -> pd.DataFrame:
+    """The reaction-table checks `load_bundle` will make, plus two it cannot.
+
+    The extra two -- no constant column and no column the RF would have seen as
+    NaN -- are the ways R's `scale()` would have failed on Doyle's table, so
+    passing them is also a check that this is the table their model ran on.
+    """
+    columns = cfg["reaction_features"]["columns"]
+    values = table[columns].to_numpy(dtype=float)
+    checks = [
+        ("row-aligned with reactions.csv", list(table.row_id) == list(reactions.row_id),
+         f"{len(table)} rows"),
+        ("every declared column present", all(c in table for c in columns),
+         f"{len(columns)} columns"),
+        ("all values finite", np.isfinite(values).all(), "no NaN/inf"),
+        ("no constant column", bool((np.nanstd(values, axis=0) > 0).all()),
+         f"{int((np.nanstd(values, axis=0) == 0).sum())} constant"),
+        ("no clash with reaction or Kraken columns",
+         not (set(columns) & (set(reactions.columns) | set(ligands.columns))),
+         "names disjoint"),
+    ]
+    frame = pd.DataFrame(checks, columns=["check", "ok", "detail"])
+    if not frame.ok.all():
+        raise ValueError("Reaction-feature checks failed:\n"
+                         + frame[~frame.ok].to_string(index=False))
+    return frame
+
+
 def write_bundle(destination, reactions: pd.DataFrame, cfg: dict, mapping: dict,
                  ligands: pd.DataFrame | None = None, audit: dict | None = None,
-                 full_kraken: bool = False) -> Path:
+                 full_kraken: bool = False,
+                 reaction_features: pd.DataFrame | None = None) -> Path:
     """Write a complete bundle and return its directory.
 
     `ligands` defaults to the full Kraken table; `full_kraken=False` trims it to
     the ids this screen uses, which is what the training zip needs and is all
     `feature_frame` ever joins against. The figures read the full reference from
     `reference/kraken/` regardless, so trimming costs the report nothing.
+
+    `reaction_features` (row_id + numeric columns) is written as
+    `reaction_features.csv`; `cfg` must already declare it -- see
+    `declare_reaction_features`.
     """
     destination = Path(destination)
     destination.mkdir(parents=True, exist_ok=True)
     ligands = kraken_features() if ligands is None else ligands
 
     check_bundle(reactions, cfg, ligands)
+    if (reaction_features is None) != (not cfg.get("reaction_features")):
+        raise ValueError("Pass reaction_features= exactly when cfg declares "
+                         "reaction_features (prep.declare_reaction_features)")
+    if reaction_features is not None:
+        check_reaction_features(reactions, reaction_features, cfg, ligands)
+        reaction_features[["row_id"] + cfg["reaction_features"]["columns"]].to_csv(
+            destination / REACTION_FEATURES_FILE, index=False)
 
     kept = (ligands if full_kraken
             else ligands[ligands.kraken_id.isin(set(reactions["kraken_id"]))])

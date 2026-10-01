@@ -1,19 +1,14 @@
-"""Review and plotting, shared by every dataset the hub runs.
+"""Review and plotting for gp_collab_perera runs.
 
 Copied from DOPE-MURI `hazel_gp/results.py` with the producer-side functions
 removed (`collect_results`, `task_statuses`, `export_result_archive`) -- those
-build the tables, and `gpc export-hazel` already did that. The metric and figure
-definitions are that project's, not a reimplementation.
+build the tables, and `gpc export-hazel` already did that. Everything kept here
+is byte-identical to the original, so the figures and metrics are that
+project's, not a reimplementation. `read_json` and `file_hash` are inlined from
+`hazel_gp/config.py`, and `review_controls` from `hazel_gp/notebook.py`, so this
+one file has no hazel_gp dependency.
 
-Two things were generalised for the hub, both marked in place:
-
-* the group column is read from the bundle instead of being hardcoded to
-  "ligand", so feature importance works on a catalyst-grouped screen;
-* the target column likewise, so `TARGET` is imported as a fallback only.
-
-This is the *review* layer, for working interactively in a notebook. The
-*saved-figure* layer is `gpc/figures.py`: to move a label or change a colour in
-something the report writes to disk, edit that file, not this one.
+Drop it next to the notebook and `import results`.
 """
 from __future__ import annotations
 
@@ -26,8 +21,7 @@ import pandas as pd
 from scipy.stats import norm, kendalltau, spearmanr
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
-from .config import (GROUP, TARGET, bundle_group, bundle_target,  # noqa: F401
-                     condition_numeric, reaction_columns)
+TARGET = "Product_Yield_PCT_Area_UV"
 
 
 def read_json(path):
@@ -65,7 +59,7 @@ def prepare(runs, bundle="inputs", refresh: bool = False):
             raise FileNotFoundError(f"No finished tasks under {runs}")
     root = runs / "hazel_export"
     if refresh or not (root / "collected" / "collection.json").exists():
-        from .export_hazel import export
+        from gpc.export_hazel import export
         return export(bundle, runs, root, hazel_method_names=True)
     print(f"using the existing export at {root} (refresh=True to rebuild)")
     return root
@@ -132,27 +126,15 @@ def grouped_predictions(predictions, model, method="iid_matched"):
 # `pc_scores` is the PCA reduction itself: PC1..PC4. It was once a loading-weighted
 # expansion of all 190 reference descriptors, so runs collected before that change
 # carry the OLD meaning under the same key -- do not plot them alongside new ones.
-MODEL_LABELS = {"pc_scores": "PC scores", "pc_scores_long": "PC scores (long)",
-                "group_ohe": "OHE", "ligand_ohe": "ligand OHE", "catalyst_ohe": "catalyst OHE"}
+MODEL_LABELS = {"pc_scores": "PC scores", "catalyst_ohe": "catalyst OHE", "pc_scores_long": "PC scores (long)"}
 # Canonical left-to-right order for every figure and table, so the Perera and
 # Ahneman reviews read the same way regardless of the order a run's config
 # happened to list its models in. Anything unlisted keeps its collected order
 # and follows these.
-MODEL_ORDER = ["group_ohe", "ligand_ohe", "catalyst_ohe", "selected_2",
-               "vbur_min_vmin", "vbur_boltz_vmin",
-               "selected_5", "pc_top",
+MODEL_ORDER = ["ligand_ohe", "catalyst_ohe", "selected_2", "selected_5", "pc_top",
                "pc_scores",
                "pc_scores_long",
-               "rxnpredict_full", "rxnpredict_full_ohe",
-               # ahneman_doyle: Doyle's 120 RF descriptors, alone then + Kraken
-               "doyle_full", "doyle_full_group_ohe", "doyle_full_selected_2", "doyle_full_vbur_min_vmin",
-               "doyle_full_vbur_boltz_vmin", "doyle_full_selected_5",
-               "doyle_full_pc_top", "doyle_full_pc_scores", "doyle_full_kraken_all",
-               # ... and in place of Doyle's ligand descriptors, then the mirror
-               "doyle_cond_group_ohe", "doyle_cond_selected_2", "doyle_cond_vbur_min_vmin",
-               "doyle_cond_vbur_boltz_vmin", "doyle_cond_selected_5",
-               "doyle_cond_pc_top", "doyle_cond_pc_scores", "doyle_cond_kraken_all",
-               "doyle_ligand_cond_ohe"]
+               "rxnpredict_full", "rxnpredict_full_ohe"]
 METHOD_LABELS = {"lolo": "LOLO", "iid_matched": "Matched IID",
                  "kfold": "5-fold CV", "holdout": "80:20 split"}
 # Ranking direction per metric. Coverage metrics are absent on purpose: closeness to the
@@ -453,82 +435,63 @@ def _task_dir(runs, model, method) -> Path:
     raise FileNotFoundError(f"No {model}__{method} task under {runs}")
 
 
-def _fold_encoder(bundle, model, run_cfg=None):
-    """(reactions, prepared, X, fit_fold) for one bundle and one feature section.
+def _fold_encoder(bundle, model):
+    """(reactions, prepared, X, fit_fold) for whichever clone this is.
+
+    The Ahneman bundle carries a published descriptor table that the Perera one
+    does not: there `load_bundle` returns it as a fifth value and `feature_frame` /
+    `_preprocessor` take it as a trailing argument. The signatures decide which, so
+    this file stays identical in both projects.
 
     `fit_fold(train_idx)` returns the preprocessor fitted on those rows only -- the
     same fit the run's own pipeline made for that fold, so its output column order is
     the one the kernel indexed and its scaler never saw the held-out ligand.
     """
-    from .data import load_bundle
-    from .features import _preprocessor, apply_feature_overrides, feature_frame
-    reactions, ligands, reference, prepared = load_bundle(bundle)
-    if run_cfg:
-        prepared = apply_feature_overrides(prepared, run_cfg)
-    X = feature_frame(reactions, ligands, model, prepared, reference)
+    import inspect
+    from gpc.data import load_bundle
+    from gpc.features import _preprocessor, feature_frame
+    parts = load_bundle(bundle)
+    reactions, ligands, reference, prepared = parts[:4]
+    rxn_features = parts[4] if len(parts) > 4 else None
+    rxn_columns = [c for c in rxn_features.columns if c != "row_id"] if rxn_features is not None else []
+    frame_takes_rxn = len(inspect.signature(feature_frame).parameters) > 5
+    prep_takes_rxn = len(inspect.signature(_preprocessor).parameters) > 4
+    X = (feature_frame(reactions, ligands, model, prepared, reference, rxn_features)
+         if frame_takes_rxn else feature_frame(reactions, ligands, model, prepared, reference))
 
     def fit_fold(train_idx):
-        return _preprocessor(X, model, prepared, reference).fit(X.iloc[train_idx])
+        p = (_preprocessor(X, model, prepared, reference, rxn_columns) if prep_takes_rxn
+             else _preprocessor(X, model, prepared, reference))
+        return p.fit(X.iloc[train_idx])
 
     return reactions, prepared, X, fit_fold
 
 
-def _task_folds(reactions, meta, prepared=None):
+def _task_folds(reactions, meta):
     """The task's own folds, rebuilt from the seed and stratify flag it recorded."""
-    from .splits import make_folds
-    group = bundle_group(prepared) if prepared is not None else GROUP
-    return make_folds(reactions, meta["method"], meta["seed"], meta["stratify"], group)
+    from gpc.splits import make_folds
+    return make_folds(reactions, meta["method"], meta["seed"], meta["stratify"])
 
 
 # gpc/train.py's `feature_groups` is the authority on which encoded columns each
 # kernel group covers, but importing it pulls in torch and this review path is
 # deliberately torch-free. The two rules below are copied from it; if the grouping
 # definitions there change, change these with them.
-#
-# The one-hot prefix is `cat__<group>_`, and <group> is whatever the bundle says
-# -- "ligand" in Perera and Ahneman, "catalyst" in Gesmundo. The original copies
-# of this file hardcoded `cat__ligand_`, which made `ligand_only=True` match
-# nothing on a catalyst-grouped screen and fail with a misleading "encodes no
-# ligand-block columns to rank". Reading the group from `prepared` is that fix.
-def _ligand_columns(columns, prepared=None):
-    """Group block: the numeric descriptors plus the group identity one-hots."""
-    group = bundle_group(prepared) if prepared is not None else GROUP
-    return [c for c in columns
-            if c.startswith("num__") or c.startswith(f"cat__{group}_")]
-
-
-def _family_ligand_columns(columns, prepared):
-    """The columns `rank_features(ligand_only=True)` should keep.
-
-    Same as `_ligand_columns` -- which must keep mirroring the trainer's kernel
-    groups -- except for a bundle with reaction-level descriptors. There every
-    Doyle column is numeric, but only those of the group's own component
-    (`ligand_*` on Ahneman) describe the ligand; `aryl_halide_*`, `base_*` and
-    `additive_*` describe the conditions and are labelled so.
-    """
-    rxn = set(reaction_columns(prepared)) if prepared is not None else set()
-    continuous = set(condition_numeric(prepared)) if prepared is not None else set()
-    group = bundle_group(prepared) if prepared is not None else GROUP
-
-    def is_condition(c):
-        # Continuous conditions, and Doyle descriptors of a non-group component.
-        name = c[5:] if c.startswith("num__") else None
-        return name is not None and (name in continuous
-                                     or (name in rxn and not name.startswith(f"{group}_")))
-    return [c for c in _ligand_columns(columns, prepared) if not is_condition(c)]
+def _ligand_columns(columns):
+    """Ligand block: the numeric descriptors plus the ligand identity one-hots."""
+    return [c for c in columns if c.startswith("num__") or c.startswith("cat__ligand_")]
 
 
 def _kernel_groups(grouping, prepared, columns):
     """Encoded columns per kernel group, ordered as that group's lengthscales index them."""
-    group = bundle_group(prepared)
     if grouping == "all":
         return {"fp_all": list(columns)}
-    if grouping in ("group_conditions", "ligand_conditions", "catalyst_reagents"):
-        return {"fp_group": _ligand_columns(columns, prepared),
+    if grouping == "ligand_conditions":
+        return {"fp_ligand": _ligand_columns(columns),
                 "fp_conditions": [c for c in columns if c.startswith("cat__")
-                                  and not c.startswith(f"cat__{group}_")]}
+                                  and not c.startswith("cat__ligand_")]}
     if grouping == "per_field":
-        groups = {"fp_group": _ligand_columns(columns, prepared)}
+        groups = {"fp_ligand": _ligand_columns(columns)}
         for field in prepared["data"]["common_categorical"]:
             groups[f"fp_{field}"] = [c for c in columns if c.startswith(f"cat__{field}_")]
         return groups
@@ -577,8 +540,8 @@ def ard_lengthscales(runs, bundle, model, method="lolo"):
                          f"{seed}; the run must be cross-validated with return_ls=True.")
     per_fold = scores[seed]["test_lengthscale"]
     grouping = meta["config"]["gp"]["grouping"]
-    reactions, prepared, X, fit_fold = _fold_encoder(bundle, model, meta.get("config"))
-    folds, _ = _task_folds(reactions, meta, prepared)
+    reactions, prepared, X, fit_fold = _fold_encoder(bundle, model)
+    folds, _ = _task_folds(reactions, meta)
     if len(per_fold) != len(folds):
         raise ValueError(f"{len(per_fold)} lengthscale records for {len(folds)} folds; "
                          f"{directory} does not match the bundle it is being read against")
@@ -587,7 +550,7 @@ def ard_lengthscales(runs, bundle, model, method="lolo"):
     for fold, ((train, _), reported) in enumerate(zip(folds, per_fold)):
         names = list(fit_fold(train).get_feature_names_out())
         groups = _kernel_groups(grouping, prepared, names)
-        ligand = set(_family_ligand_columns(names, prepared))
+        ligand = set(_ligand_columns(names))
         isotropic = [k for k, cols in groups.items() if k in reported and len(cols) > 1]
         if isotropic:
             raise ValueError(
@@ -721,8 +684,8 @@ def ligand_distances(runs, bundle, model, method="lolo"):
     """
     directory = _task_dir(runs, model, method)
     meta = read_json(directory / "meta.json")
-    reactions, prepared, X, fit_fold = _fold_encoder(bundle, model, meta.get("config"))
-    folds, references = _task_folds(reactions, meta, prepared)
+    reactions, prepared, X, fit_fold = _fold_encoder(bundle, model)
+    folds, references = _task_folds(reactions, meta)
     if not all(references):
         raise ValueError(f"{meta['method']} folds do not each hold out one ligand, so there "
                          f"is no held-out ligand to measure a distance for; use method='lolo'")

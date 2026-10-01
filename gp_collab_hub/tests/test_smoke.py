@@ -19,11 +19,14 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from gpc import figures                                         # noqa: E402
-from gpc.config import (FIVE, SELECTED_SETS, TWO, VMIN, bundle_group,  # noqa: E402
-                        bundle_target, load_config)
+from gpc.config import (FIVE, KRAKEN_ALL, REACTION_FAMILIES, REACTION_SECTIONS,  # noqa: E402
+                        SELECTED_SETS, TWO, VMIN, bundle_group, bundle_target,
+                        check_reaction_sections, check_run_against_bundle,
+                        condition_numeric, load_config, reaction_blocks,
+                        reaction_columns)
 from gpc.data import group_mapping, load_bundle                 # noqa: E402
 from gpc.features import (apply_feature_overrides, feature_alias, feature_frame,  # noqa: E402
-                          _preprocessor, model_columns)
+                          _preprocessor, _section_columns, model_columns)
 from gpc.splits import make_folds, parse_method                 # noqa: E402
 
 # In the hub a bundle sits at datasets/<name>/inputs; inside an HPC zip there is
@@ -98,10 +101,12 @@ def test_group_ohe_adds_the_group_column(bundle):
 
 def test_selected_sections_use_the_shared_descriptors(bundle):
     _, _, reference, prepared = load_bundle(bundle)
+    # The section's own descriptors -- continuous conditions are appended after
+    # them by model_columns and checked in test_continuous_conditions_*.
     for section, columns in SELECTED_SETS.items():
-        assert model_columns(section, prepared, reference)[0] == columns
-    assert model_columns("selected_2", prepared, reference)[0] == TWO
-    assert model_columns("selected_5", prepared, reference)[0] == FIVE
+        assert _section_columns(section, prepared, reference)[0] == columns
+    assert _section_columns("selected_2", prepared, reference)[0] == TWO
+    assert _section_columns("selected_5", prepared, reference)[0] == FIVE
 
 
 def test_vmin_pairs_are_one_steric_plus_one_electronic(bundle):
@@ -109,7 +114,7 @@ def test_vmin_pairs_are_one_steric_plus_one_electronic(bundle):
     descriptors like selected_2, but not two sterics."""
     _, ligands, reference, prepared = load_bundle(bundle)
     for section in ("vbur_min_vmin", "vbur_boltz_vmin"):
-        columns = model_columns(section, prepared, reference)[0]
+        columns = _section_columns(section, prepared, reference)[0]
         assert len(columns) == 2
         assert VMIN in columns
         assert sum(c.startswith("vbur_pct_") for c in columns) == 1
@@ -121,10 +126,10 @@ def test_feature_columns_override(bundle):
     _, _, reference, prepared = load_bundle(bundle)
     patched = apply_feature_overrides(prepared, {
         "run": {"feature_columns": {"selected_2": ["vbur_pct_delta"]}}})
-    assert model_columns("selected_2", patched, reference)[0] == ["vbur_pct_delta"]
+    assert _section_columns("selected_2", patched, reference)[0] == ["vbur_pct_delta"]
     # The bundle config itself must not be mutated, or one task's override would
     # leak into the next one in the same process.
-    assert model_columns("selected_2", prepared, reference)[0] == TWO
+    assert _section_columns("selected_2", prepared, reference)[0] == TWO
 
 
 def test_folds_partition_every_row(bundle):
@@ -177,8 +182,119 @@ def test_figure_style_covers_every_section():
     """A section with no display label would print its raw config key on a
     figure heading for a talk, which is the kind of thing nobody notices until
     the talk."""
-    for section in SECTIONS:
+    for section in [*SECTIONS, *REACTION_SECTIONS]:
         assert section in figures.FEATURESET_LABELS
     for method in ("lolo", "iid_matched", "kfold"):
         assert method in figures.METHOD_DISPLAY
         assert method in figures.STYLE["pooled"]["method_colors"]
+
+
+# ---------------------------------------------------- reaction-level descriptors
+# Only a bundle that declares "reaction_features" (ahneman_doyle_dft: Doyle's 120
+# DFT descriptors) can run the doyle_* sections; every other bundle must refuse
+# them up front rather than fail inside a cluster job.
+
+def test_reaction_sections_follow_the_bundle(bundle):
+    reactions, ligands, reference, prepared = load_bundle(bundle)
+    rxn = reaction_columns(prepared)
+    if not rxn:
+        for model in REACTION_SECTIONS:
+            with pytest.raises(ValueError):
+                model_columns(model, prepared, reference)
+        with pytest.raises(ValueError):
+            check_reaction_sections(list(REACTION_SECTIONS), prepared)
+        return
+    assert set(rxn) <= set(reactions.columns)
+    assert np.isfinite(reactions[rxn].to_numpy(dtype=float)).all()
+    blocks = reaction_blocks(prepared)
+    group = bundle_group(prepared)
+    assert blocks["group"] and blocks["conditions"]
+    assert sorted(blocks["group"] + blocks["conditions"]) == sorted(rxn)
+    for model, spec in REACTION_SECTIONS.items():
+        numeric, categorical = model_columns(model, prepared, reference)
+        doyle = blocks[spec["doyle"]]
+        assert numeric[:len(doyle)] == doyle, f"{model} must lead with its Doyle block"
+        if spec["ligand"] in (None, "group_ohe"):
+            extra = []
+        elif spec["ligand"] == KRAKEN_ALL:
+            extra = list(reference.columns)
+        else:
+            extra = model_columns(spec["ligand"], prepared, reference)[0]
+        assert numeric[len(doyle):] == extra
+        expected_cat = (([group] if spec["ligand"] == "group_ohe" else [])
+                        + (list(prepared["data"]["common_categorical"])
+                           if spec["condition_ohe"] else []))
+        assert categorical == expected_cat, model
+        # The in-place family must carry none of Doyle's ligand descriptors, and
+        # the added family all of them -- the comparison depends on exactly that.
+        if model.startswith("doyle_cond_"):
+            assert not set(numeric) & set(blocks["group"]), model
+        if model.startswith("doyle_full"):
+            assert set(blocks["group"]) <= set(numeric), model
+        frame = feature_frame(reactions, ligands, model, prepared, reference)
+        encoded = _preprocessor(frame, model, prepared, reference).fit_transform(frame)
+        width = len(doyle) + len(extra) + sum(reactions[c].nunique() for c in expected_cat)
+        assert encoded.shape == (len(reactions), width), model
+        assert np.isfinite(np.asarray(encoded, dtype=float)).all()
+    # Every in-place section has an added twin with the same ligand representation.
+    for model in REACTION_FAMILIES["in_place"]:
+        twin = model.replace("doyle_cond_", "doyle_full_")
+        assert twin in REACTION_FAMILIES["added"], f"{model} has no added twin"
+    with pytest.raises(ValueError):
+        check_reaction_sections(["doyle_full"], prepared, {"grouping": "per_field"})
+
+
+def test_reaction_family_labels(bundle):
+    """ARD ranking with ligand_only=True must keep the ligand's own Doyle
+    descriptors and drop the aryl halide/base/additive ones."""
+    from gpc.results import _family_ligand_columns
+    _, _, _, prepared = load_bundle(bundle)
+    rxn = reaction_columns(prepared)
+    if not rxn:
+        pytest.skip("bundle has no reaction-level descriptors")
+    group = bundle_group(prepared)
+    names = [f"num__{c}" for c in rxn] + ["num__vbur_pct_boltz"]
+    kept = set(_family_ligand_columns(names, prepared))
+    assert "num__vbur_pct_boltz" in kept
+    for c in rxn:
+        assert (f"num__{c}" in kept) == c.startswith(f"{group}_")
+
+
+# ------------------------------------------------------- continuous conditions
+# Reizman_Summit's temperature / loading / residence time are continuous. A bundle declares
+# them in data.common_numeric and every section must carry them as numeric
+# inputs, never as one-hots and never as ligand chemistry.
+
+def test_continuous_conditions_in_every_section(bundle):
+    reactions, ligands, reference, prepared = load_bundle(bundle)
+    numeric_conditions = condition_numeric(prepared)
+    if not numeric_conditions:
+        pytest.skip("bundle has no continuous conditions")
+    assert np.isfinite(reactions[numeric_conditions].to_numpy(dtype=float)).all()
+    sections = list(prepared["features"]["models"])
+    for model in sections:
+        numeric, categorical = model_columns(model, prepared, reference)
+        assert numeric[-len(numeric_conditions):] == numeric_conditions, model
+        assert not set(numeric_conditions) & set(categorical), model
+        frame = feature_frame(reactions, ligands, model, prepared, reference)
+        names = list(_preprocessor(frame, model, prepared, reference)
+                     .fit(frame).get_feature_names_out())
+        for c in numeric_conditions:
+            assert f"num__{c}" in names, (model, c)
+    # Split kernel groupings would model a temperature as ligand chemistry.
+    with pytest.raises(ValueError):
+        check_run_against_bundle(sections, prepared, {"grouping": "group_conditions"})
+    check_run_against_bundle(sections, prepared, {"grouping": "all"})
+
+
+def test_continuous_conditions_are_not_ligand_family(bundle):
+    from gpc.results import _family_ligand_columns
+    _, _, _, prepared = load_bundle(bundle)
+    numeric_conditions = condition_numeric(prepared)
+    if not numeric_conditions:
+        pytest.skip("bundle has no continuous conditions")
+    group = bundle_group(prepared)
+    names = ([f"num__{c}" for c in numeric_conditions]
+             + ["num__vbur_pct_boltz", f"cat__{group}_x", "cat__other_y"])
+    kept = set(_family_ligand_columns(names, prepared))
+    assert kept == {"num__vbur_pct_boltz", f"cat__{group}_x"}
