@@ -46,7 +46,7 @@
     "use_cuda": true
   },
   "hpc": {
-    "conda_env": "/usr/local/usrapps/ddomlab/kagoble/gp_collab_hub_py312",
+    "conda_env": "/usr/local/usrapps/ddomlab/kagoble/gp_collab_hazel_py312",
     "walltime": "00:20:00",
     "cpu_walltime": "00:20:00",
     "gpu_request": "gpu:l40:1",

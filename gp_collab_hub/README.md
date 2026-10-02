@@ -18,7 +18,7 @@ The three original folders are left alone. Their runs are readable from here.
 datasets/<name>/prepare_<name>.ipynb     1. intake:  a screen -> a bundle
 build_run.ipynb                          2. plan:    choices -> config + zip
         |  upload, run on the cluster, bring runs/<tag>/ back
-make_report.ipynb                        3. report:  a run -> results/<name>_<date>/
+visualize_results.ipynb                  3. review:  runs -> figures shown inline (nothing saved)
 compare_datasets.ipynb                   4. compare: across datasets
 ```
 
@@ -82,7 +82,13 @@ section or GP key that does not exist, and an `iid_stratified_<n>` whose fold
 count does not match the screen's group count — that method exists to be LOLO's
 matched control, and with the wrong `n` it silently is not one.
 
-### 3. Report — `make_report.ipynb`, or `python -m gpc ... report`
+### 3. Review — `visualize_results.ipynb`
+
+Reads `runs/<tag>/collected/` and draws every chart inline in the
+`compare_featuresets.ipynb` style; it writes no files. Point `RUNS` at the
+runs to look at.
+
+### Saved report — `python -m gpc ... report` (only when files are wanted)
 
 ```bash
 python -m gpc --bundle datasets/perera/inputs --runs runs/perera_20260923 report

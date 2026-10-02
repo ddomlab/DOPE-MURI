@@ -39,7 +39,7 @@ gp:
   normalize_y: true
   use_cuda: true
 hpc:
-  conda_env: /usr/local/usrapps/ddomlab/kagoble/gp_collab_hub_py312
+  conda_env: /usr/local/usrapps/ddomlab/kagoble/gp_collab_hazel_py312
   walltime: 03:59:00
   cpu_walltime: 05:59:00
   gpu_request: gpu:l40:1

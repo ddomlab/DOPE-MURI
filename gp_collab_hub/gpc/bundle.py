@@ -55,7 +55,7 @@ BUNDLE_EXTRA = ("audit.json", "model_features.csv", "model_table.csv", "pca_load
 MAX_WALLTIME = "00:20:00"
 
 DEFAULT_HPC = {
-    "conda_env": "/usr/local/usrapps/ddomlab/kagoble/gp_collab_hub_py312",
+    "conda_env": "/usr/local/usrapps/ddomlab/kagoble/gp_collab_hazel_py312",
     "walltime": MAX_WALLTIME,
     "cpu_walltime": MAX_WALLTIME,
     "collect_walltime": MAX_WALLTIME,
