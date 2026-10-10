@@ -1,0 +1,82 @@
+{
+  "source": {
+    "url": "https://github.com/cernaklab/medchem-reaction-miniaturization/raw/main/suzuki-ez.xlsx",
+    "sheet": "suzuki_informer",
+    "file": "suzuki-ez.xlsx",
+    "sha256": "bc61800940c839ed037979d05610d25c1b6a8c0a7788c8bcb8fffe8a7bf99bb8",
+    "bytes": 444781
+  },
+  "rows": {
+    "wells_in_sheet": 1440,
+    "dropped_no_conversion": 120,
+    "rows_kept": 1320,
+    "dropped_by_core": {
+      "Core_02": 89,
+      "Core_01": 15,
+      "Core_05": 6,
+      "Core_11": 6,
+      "Core_08": 3,
+      "Core_03": 1
+    },
+    "dropped_by_catalyst": {
+      "Aphos G3": 39,
+      "tBuXphos G3": 25,
+      "Xphos G3": 23,
+      "RuPhos G3": 19,
+      "tBu3P G2": 14
+    }
+  },
+  "design": {
+    "cores": 12,
+    "monomers": 10,
+    "condition_sets": 12,
+    "condition_sets_per_catalyst": {
+      "Aphos G3": 4,
+      "RuPhos G3": 2,
+      "Xphos G3": 2,
+      "tBu3P G2": 2,
+      "tBuXphos G3": 2
+    },
+    "design_cells": 1440,
+    "rows_per_catalyst": {
+      "Aphos G3": 441,
+      "tBu3P G2": 226,
+      "RuPhos G3": 221,
+      "Xphos G3": 217,
+      "tBuXphos G3": 215
+    },
+    "replicate_rows_sharing_a_feature_row": 94,
+    "replicate_note": "Kept. Random folds can split a replicate pair across train and test; lolo cannot."
+  },
+  "dropped_columns": {
+    "Chemistry": "constant across all 1440 wells",
+    "Column": "assay plumbing",
+    "Condition Order": "run-order index, not a reagent; see verify_design",
+    "Core ID.1": "empty in every row",
+    "Expt-Sample": "assay plumbing",
+    "Monomer ID.1": "empty in every row",
+    "Monomer Order": "ordering index that parallels Monomer ID",
+    "NOTE": "assay plumbing",
+    "Pdt-to-IS Ratio": "assay plumbing",
+    "Plate Position": "assay plumbing",
+    "Product Formula": "assay plumbing",
+    "Product Mass": "assay plumbing",
+    "Row": "assay plumbing",
+    "Solvent": "constant across all 1440 wells",
+    "UV254_Core Area (Core_05 adjusted)": "assay plumbing",
+    "UV254_Core AreaAbs": "assay plumbing",
+    "UV254_Core Rt(min)": "assay plumbing",
+    "UV254_CouplingProd AreaAbs": "assay plumbing",
+    "UV254_CouplingProd Rt(min)": "assay plumbing",
+    "UV254_PhPh Area (Core_05 adjusted)": "assay plumbing",
+    "UV254_PhPh AreaAbs": "assay plumbing",
+    "UV254_PhPh Rt(min)": "assay plumbing"
+  },
+  "target": {
+    "name": "conversion",
+    "units": "relative percent conversion",
+    "min": 0.0,
+    "max": 100.0,
+    "mean": 40.1608
+  }
+}

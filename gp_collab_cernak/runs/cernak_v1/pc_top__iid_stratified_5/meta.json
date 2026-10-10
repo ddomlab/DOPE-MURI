@@ -1,0 +1,58 @@
+{
+  "model": "pc_top",
+  "method": "iid_stratified_5",
+  "seed": 42,
+  "stratify": true,
+  "n_folds": 5,
+  "n_rows": 1320,
+  "n_features": 16,
+  "config": {
+    "schema_version": 1,
+    "paths": {
+      "bundle": "inputs",
+      "runs": "runs/cernak_v1"
+    },
+    "run": {
+      "models": [
+        "catalyst_ohe",
+        "selected_2",
+        "selected_5",
+        "pc_top",
+        "pc_scores"
+      ],
+      "methods": [
+        "lolo",
+        "iid_stratified_5",
+        "kfold_stratified_5"
+      ],
+      "seed": 42,
+      "stratify": true,
+      "threads": 4,
+      "model_overrides": {}
+    },
+    "gp": {
+      "kernel": "RBF",
+      "grouping": "all",
+      "mixing_method": "product",
+      "ard": true,
+      "dtype": "float32",
+      "noise": null,
+      "noise_floor": 0.01,
+      "outputscale": null,
+      "train_jitter": 0.0001,
+      "predict_jitter": 0.0001,
+      "restarts": 1,
+      "n_epochs": 400,
+      "learning_rate": 0.01,
+      "prior": true,
+      "normalize_y": true,
+      "use_cuda": true
+    }
+  },
+  "device": "cuda",
+  "versions": {
+    "python": "3.12.14",
+    "torch": "2.8.0+cu126",
+    "cuda": "12.6"
+  }
+}

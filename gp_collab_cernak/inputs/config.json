@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "dataset": "cernak_suzuki_informer_2023",
+  "source": "https://github.com/cernaklab/medchem-reaction-miniaturization",
+  "sheet": "suzuki_informer",
+  "data": {
+    "target": "conversion",
+    "group": "catalyst",
+    "common_categorical": [
+      "base",
+      "cosolvent",
+      "core",
+      "monomer"
+    ],
+    "expected_rows": 1320,
+    "expected_groups": 5
+  },
+  "features": {
+    "models": [
+      "catalyst_ohe",
+      "selected_2",
+      "selected_5",
+      "pc_top",
+      "pc_scores"
+    ],
+    "ohe_policy": "train_ignore_unknown",
+    "pc_scores_form": "component_scores"
+  },
+  "evaluation": {
+    "methods": [
+      "lolo",
+      "kfold_stratified_5",
+      "kfold_5"
+    ],
+    "seed": 42,
+    "stratify_on": "catalyst"
+  }
+}

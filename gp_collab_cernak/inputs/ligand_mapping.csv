@@ -1,0 +1,6 @@
+catalyst,kraken_id,kraken_name,can_smiles
+Aphos G3,216,Ata Phos / AmPhos,CN(C)c1ccc(P(C(C)(C)C)C(C)(C)C)cc1
+RuPhos G3,4,RuPhos,CC(C)Oc1cccc(OC(C)C)c1-c1ccccc1P(C1CCCCC1)C1CCCCC1
+Xphos G3,1,Xphos,CC(C)c1cc(C(C)C)c(-c2ccccc2P(C2CCCCC2)C2CCCCC2)c(C(C)C)c1
+tBu3P G2,8,PtBu3,CC(C)(C)P(C(C)(C)C)C(C)(C)C
+tBuXphos G3,90,tBuXPhos,CC(C)c1cc(C(C)C)c(-c2ccccc2P(C(C)(C)C)C(C)(C)C)c(C(C)C)c1
