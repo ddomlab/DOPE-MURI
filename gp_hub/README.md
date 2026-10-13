@@ -160,7 +160,7 @@ datasets/<name>/    an intake notebook and the bundle it writes
 configs/            run configs
 exports/            zips to upload
 results/            what comes back
-runs/               raw task output from the cluster
+runs/               raw task output from the cluster (tracked in git, so every machine has it)
 ```
 
 ## Feature sections
