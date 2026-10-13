@@ -1,0 +1,19 @@
+{
+  "run_id": "gesmundo",
+  "bundle_id": "https://github.com/cernaklab/medchem-reaction-miniaturization",
+  "dataset": "gesmundo",
+  "group": "catalyst",
+  "target": "conversion",
+  "complete": true,
+  "expected_tasks": 105,
+  "completed_tasks": 105,
+  "incomplete_task_ids": [],
+  "iid_pooling": "Every method is a non-repeating partition, pooled like LOLO.",
+  "produced_by": "gpc export-hazel",
+  "output_hashes": {
+    "predictions.csv": "08f924771812d981be0845c085eb7349db128663ccd3b80a9057ad1eca4a390e",
+    "metrics_by_split.csv": "1e3d40538f8b6de724cb090704d4e563f91a40fbb0287eb6dbf01aa7fe4ac413",
+    "summary.csv": "4d8b3ebf41b2ff9c6c788a06caf0a050a728a3ac0fc8e007b5066e29013370eb",
+    "task_status.csv": "3ab4e12002f3769ccf70dfdc35c6d5b8cf0ea0d54533c31dcf2ce92ed895e4f7"
+  }
+}

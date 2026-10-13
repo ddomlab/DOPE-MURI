@@ -1,0 +1,19 @@
+{
+  "run_id": "ahneman",
+  "bundle_id": "https://github.com/doylelab/rxnpredict",
+  "dataset": "ahneman",
+  "group": "ligand",
+  "target": "yield",
+  "complete": true,
+  "expected_tasks": 126,
+  "completed_tasks": 126,
+  "incomplete_task_ids": [],
+  "iid_pooling": "Every method is a non-repeating partition, pooled like LOLO.",
+  "produced_by": "gpc export-hazel",
+  "output_hashes": {
+    "predictions.csv": "b13210bad0fcf906092db7e5730ac76629e7641efa64e8895bc76320a5173c25",
+    "metrics_by_split.csv": "f1cb19575c1c886e91766ab60b3cb369f4d74207e461986f9b6595763e416868",
+    "summary.csv": "8fd5fbc836dd045c22040670c60f721f27560c4e51223cc71d471370bcb9fa04",
+    "task_status.csv": "e1deb1ee53aaba9436dbe4932f3e83d47bad07a4a84089c1a01c9e76cff2a85d"
+  }
+}

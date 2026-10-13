@@ -1,0 +1,19 @@
+{
+  "run_id": "perera",
+  "bundle_id": "https://raw.githubusercontent.com/Paulilein/Perera2018/main/Perera2018_Data_Original.csv",
+  "dataset": "perera",
+  "group": "ligand",
+  "target": "Product_Yield_PCT_Area_UV",
+  "complete": true,
+  "expected_tasks": 105,
+  "completed_tasks": 105,
+  "incomplete_task_ids": [],
+  "iid_pooling": "Every method is a non-repeating partition, pooled like LOLO.",
+  "produced_by": "gpc export-hazel",
+  "output_hashes": {
+    "predictions.csv": "8154f99e3b9b63b049472a137ec40a23af596ae3fc0bfd6d070a7b52eaf6c890",
+    "metrics_by_split.csv": "81d7d917d5c2d4f9f84adea5a0c36669cf83509a12c194f85776dfd728d55e49",
+    "summary.csv": "9a9823b2dd31932334088d420b8b37e8827d46acc3c63d78414bb1e850eeee2a",
+    "task_status.csv": "55207435eb4db74e11bcce593f001dfa874b687440fa9fd64a46806b21c29c64"
+  }
+}
