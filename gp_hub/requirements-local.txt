@@ -1,0 +1,29 @@
+# The local GP_hub environment: the engine pins in requirements.txt plus what
+# the notebooks, tests and ORD_files/ import. The cluster uses requirements.txt
+# alone. Built with uv, outside OneDrive:
+#
+#   uv venv C:\venvs\GP_hub --python 3.12 --prompt GP_hub
+#   uv pip install --python C:\venvs\GP_hub\Scripts\python.exe torch==2.8.0 --index-url https://download.pytorch.org/whl/cu126
+#   uv pip install --python C:\venvs\GP_hub\Scripts\python.exe -r gp_hub\requirements-local.txt
+#   C:\venvs\GP_hub\Scripts\python.exe -m ipykernel install --user --name GP_hub --display-name GP_hub
+#
+# torch is installed first from the CUDA 12.6 index (the PyPI wheel is CPU-only
+# on Windows); swap cu126 for cpu on a machine without an NVIDIA GPU.
+-r requirements.txt
+
+# notebooks
+matplotlib==3.11.2
+ipykernel==7.4.0
+ipywidgets==8.1.9
+nbconvert==7.17.1
+
+# catalyst_distance_analysis.ipynb (ligand structures)
+rdkit==2026.9.1
+
+# ORD_files/
+ord-schema==0.9.0
+pyarrow==26.0.0
+requests==2.34.2
+
+# tests/
+pytest==9.1.1

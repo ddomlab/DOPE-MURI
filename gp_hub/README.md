@@ -238,6 +238,10 @@ Two sizing notes that change how the numbers read:
 
 ## Running it
 
+The local environment is the `GP_hub` uv venv at `C:\venvs\GP_hub` (Jupyter
+kernel `GP_hub`); `requirements-local.txt` lists it and the commands that build
+it.
+
 Locally (review only — no PyTorch needed):
 
 ```bash

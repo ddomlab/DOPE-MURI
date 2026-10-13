@@ -1,0 +1,9 @@
+# Raw ORD datasets (too large for GitHub; regenerate with
+# ORD_files/Download_ORD_Datasets.ipynb and ORD_files/ORD_Parquet_to_CSV.ipynb)
+ORD_files/ORD_datasets_csv/
+ORD_files/ORD_datasets_parquet/
+
+# Python / Jupyter
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
